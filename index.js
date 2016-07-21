@@ -4,8 +4,6 @@ const route = require('koa-route');
 const mysql = require('./mysql');
 const app = koa();
 
-const User = require('./models/user');
-
 // logger
 app.use(logger());
 
@@ -26,11 +24,8 @@ app.use(function* mysqlConnection(next) {
 	global.db.release();
 });
 
-app.use(function *() {
-	this.body = 'Hello World';
-
-	const user = yield User.get('1');
-	console.log(user);
+app.use(function* subApp(next) {
+	yield require('./apps/www/index.js');
 });
 
 app.listen(3000);
