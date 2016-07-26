@@ -1,6 +1,7 @@
 const koa = require('koa');
 const logger = require('koa-logger');
-const route = require('koa-route');
+const compose = require('koa-compose');
+const router = require('koa-router')();
 const mysql = require('./mysql');
 const app = koa();
 
@@ -15,17 +16,8 @@ app.use(function *(next) {
 	this.set('X-Response-Time', ms + 'ms');
 });
 
-// Set Up MySQL Connection
-app.use(function* mysqlConnection(next) {
-	global.db = yield connectionPool.getConnection();
-
-	yield next;
-
-	global.db.release();
-});
-
 app.use(function* subApp(next) {
-	yield require('./apps/www/index.js');
+	yield compose(require('./apps/www/index.js').middleware);
 });
 
 app.listen(3000);

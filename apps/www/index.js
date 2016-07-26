@@ -1,21 +1,16 @@
 const koa = require('koa');
 const logger = require('koa-logger');
-const route = require('koa-route');
+const route = require('koa-router');
 const Pug = require('koa-pug');
-// const mysql = require('./mysql');
-const app = koa();
-
-console.log('inside');
+const app = module.exports = koa();
 
 // Initialize pug for templating
 const pug = new Pug({
     viewPath: './views',
     pretty: true,
-    app: app // equals to pug.use(app) and app.use(pug.middleware)
 });
 
-// Set up user model
-const User = require('./../../models/user');
+app.use(pug.middleware);
 
 // Set Up MySQL Connection
 app.use(function* mysqlConnection(next) {
@@ -26,12 +21,5 @@ app.use(function* mysqlConnection(next) {
 	global.db.release();
 });
 
-app.use(function *() {
-	const user = yield User.get('1');
-	console.log(user);
-
-	this.render('index', {
-		header: 'Test',
-		content: 'testing',
-	}, true);
-});
+// Add in routes for this subapp
+app.use(require('./routes.js'));
