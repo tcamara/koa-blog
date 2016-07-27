@@ -1,11 +1,7 @@
-const router = require('koa-router');
+const router = require('koa-router')();
 
-var apiRouter = new router({
-	prefix: '/api',
-});
-console.log('inside api');
 const api = require('./handlers.js');
 
-apiRouter.get('/', api.index);
+router.get('/', api.index);
 
-module.exports = apiRouter.middleware();
+module.exports = router;

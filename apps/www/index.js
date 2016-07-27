@@ -1,6 +1,4 @@
 const koa = require('koa');
-const logger = require('koa-logger');
-const route = require('koa-router');
 const Pug = require('koa-pug');
 const app = module.exports = koa();
 
@@ -12,14 +10,5 @@ const pug = new Pug({
 
 app.use(pug.middleware);
 
-// Set Up MySQL Connection
-app.use(function* mysqlConnection(next) {
-	global.db = yield connectionPool.getConnection();
-
-	yield next;
-
-	global.db.release();
-});
-
 // Add in routes for this subapp
-app.use(require('./routes.js'));
+app.use(require('./routes.js').middleware());
