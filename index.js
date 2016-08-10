@@ -29,8 +29,10 @@ app.use(function* mysqlConnection(next) {
 });
 
 // Use koa-mount to mount each sub-application on its own path
-app.use(mount('/', wwwApp));
+
 app.use(mount('/api', apiApp));
+app.use(mount('/', wwwApp));
+
 
 app.listen(3000);
 console.log('listening');         
