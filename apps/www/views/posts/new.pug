@@ -1,0 +1,10 @@
+include ./../header.pug
+
+form(method='post' action='/posts/create')
+  input(name='title' placeholder='title' value='Test Submit')
+  br
+  input(name='content' placeholder='content' value='Test Content For Submit')
+  br
+  input(type='submit')
+
+include ./../footer.pug

@@ -4,7 +4,7 @@ const app = module.exports = koa();
 
 // Initialize pug for templating
 const pug = new Pug({
-    viewPath: './views',
+    viewPath: './apps/www/views',
     pretty: true,
 });
 

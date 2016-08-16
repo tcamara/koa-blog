@@ -14,14 +14,21 @@ www.index = function*() {
 };
 
 www.new = function*() {
-	this.render('index', {
-		header: 'New',
+	this.render('posts/new', {
+		title: 'New Post',
+		header: 'New Post',
 		content: 'testing',
 	});
 }
 
 www.create = function*() {
-	// Post.create(this.params.id);
+	const params = this.request.body;
+
+	// TODO: base this on current user
+	const author = 1;
+console.log('calling create');
+	yield Post.create(params.title, author, params.content);
+console.log('called create');
 
 	this.render('index', {
 		header: 'Create',
@@ -31,6 +38,8 @@ www.create = function*() {
 
 www.show = function*() {
 	const post = yield Post.get(this.params.id);
+	console.log('------------------');
+	console.log(post);
 
 	this.render('index', {
 		header: post.title,
