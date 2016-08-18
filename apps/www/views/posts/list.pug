@@ -1,0 +1,7 @@
+include ./../header.pug
+
+each post in posts
+  a(href=post.href) #{post.title}
+  br
+
+include ./../footer.pug

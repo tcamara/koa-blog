@@ -4,46 +4,75 @@ const www = module.exports = {};
 const Post = require('./../../../models/post.js');
 
 www.index = function*() {
-	const users = yield Post.list();
-	console.log(users);
+	console.log('running index');
 
-	this.render('index', {
-		header: 'Index',
-		content: 'testing',
+	// Need the router to be able to use named routes for links
+	const postRoutes = require('./routes.js');
+
+	const postResults = yield Post.list();
+
+	const posts = [];
+	for(let i = 0; i < postResults.length; i++) {
+		posts.push({
+			id: postResults[i].id,
+			title: postResults[i].title,
+			slug: postResults[i].slug,
+			user: postResults[i].author,
+			timestamp: postResults[i].timestamp,
+			edit_timestamp: postResults[i].edit_timestamp,
+			content: postResults[i].content,
+			href: postRoutes.url('show', postResults[i].id, postResults[i].slug),
+		});
+	}
+
+	this.render('posts/list', {
+		title: 'Posts',
+		header: 'Posts',
+		posts,
 	});
 };
 
 www.new = function*() {
+	// Need the router to be able to use named routes for the form action
+	const postRoutes = require('./routes.js');
+
 	this.render('posts/new', {
 		title: 'New Post',
 		header: 'New Post',
 		content: 'testing',
+		action: postRoutes.url('create')
 	});
 }
 
 www.create = function*() {
+	// Need the router to be able to use named routes for redirecting
+	const postRoutes = require('./routes.js');
+
 	const params = this.request.body;
 
 	// TODO: base this on current user
 	const author = 1;
-console.log('calling create');
-	yield Post.create(params.title, author, params.content);
-console.log('called create');
+	const newPostId = yield Post.create(params.title, author, params.content);
 
-	this.render('index', {
-		header: 'Create',
-		content: 'testing',
-	});
+	this.redirect(postRoutes.url('show', newPostId));
 }
 
 www.show = function*() {
-	const post = yield Post.get(this.params.id);
-	console.log('------------------');
-	console.log(post);
+	// Need the router to be able to use named routes for links
+	const postRoutes = require('./routes.js');
 
-	this.render('index', {
+	const post = yield Post.get(this.params.id);
+
+	this.render('posts/show', {
 		header: post.title,
+		id: post.id,
+		title: post.title,
+		slug: post.slug,
+		user: post.author,
+		timestamp: post.timestamp,
+		edit_timestamp: post.edit_timestamp,
 		content: post.content,
+		href: postRoutes.url('show', post.id, post.slug),
 	});
 }
 
@@ -57,10 +86,10 @@ www.update = function*() {
 }
 
 www.delete = function*() {
+	// Need the router to be able to use named routes for redirecting
+	const postRoutes = require('./routes.js');
+
 	Post.delete(this.params.id);
 
-	this.render('index', {
-		header: 'Delete',
-		content: 'testing',
-	});
+	this.redirect(postRoutes.url('index'));
 }

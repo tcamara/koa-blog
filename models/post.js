@@ -24,7 +24,7 @@ Post.get = function*(id) {
 	    });
 }
 
-Post.list = function*(page = 0, orderBy = 'id', direction = 'ASC') {
+Post.list = function*(page = 0, orderBy = 'id', direction = 'DESC') {
 	const offset = page * postsPerPage;
 
 	if(validSortColumns[orderBy] && (direction == 'ASC' || direction == 'DESC')) {
@@ -51,6 +51,8 @@ Post.create = function*(title, author, content) {
 	        const queryResult = connection.query('INSERT INTO `Post` (`title`, `slug`, `author`, `timestamp`, `content`) VALUES (?, ?, ?, now(), ?)', [title, slug, author, content]);
 	        connection.release();
 	        return queryResult;
+	    }).then((result) => {
+		    return result[0].insertId;
 	    }).catch((err) => {
 	        console.log(err); // Should catch errors during either connection or query
 	    });
