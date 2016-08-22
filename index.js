@@ -1,3 +1,6 @@
+// Sets up environmental variables based on the current environment
+require('dotenv').config();
+
 const koa = require('koa');
 const logger = require('koa-logger');
 const mount = require('koa-mount');

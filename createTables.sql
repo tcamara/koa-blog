@@ -1,7 +1,3 @@
-CREATE DATABASE `blog`;
-
-USE `blog`;
-
 DROP TABLE IF EXISTS `Post`;
 
 CREATE TABLE `Post` (
@@ -43,7 +39,3 @@ CREATE TABLE `User` (
   `bio` TEXT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
-CREATE USER 'blog_user'@'localhost' IDENTIFIED BY 'bad_password';
-
-GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
