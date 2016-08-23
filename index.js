@@ -12,7 +12,7 @@ const app = koa();
 const wwwApp = require('./apps/www/index.js');
 const apiApp = require('./apps/api/index.js');
 
-// logger
+// Logger
 app.use(logger());
 
 // Body Parser
@@ -24,6 +24,18 @@ app.use(function *(next) {
 	yield next;
 	const ms = new Date - start;
 	this.set('X-Response-Time', ms + 'ms');
+});
+
+// Top-Level Error Handling
+app.use(function *(next) {
+	try {
+		yield next;
+	}
+	catch(err) {
+		this.status = err.status || 500;
+		this.body = err.message;
+		this.app.emit('error', err, this);
+	}
 });
 
 // Use koa-mount to mount each sub-application on its own path

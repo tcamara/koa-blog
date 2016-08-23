@@ -1,6 +1,6 @@
 const Post = module.exports = {};
 
-const postsPerPage = 3;
+const postsPerPage = 5;
 const validSortColumns = {
 	'id': 1,
 	'title': 1,
@@ -20,7 +20,7 @@ Post.get = function*(id) {
 	    }).then((result) => {
 	        return result[0][0];
 	    }).catch((err) => {
-	        console.log(err); // Should catch errors during either connection or query
+	    	throw new Error('Error in Post.get: ' + err.message);
 	    });
 }
 
@@ -38,8 +38,11 @@ Post.list = function*(page = 0, orderBy = 'id', direction = 'DESC') {
 		    }).then((result) => {
 		        return result[0];
 		    }).catch((err) => {
-		        console.log(err); // Should catch errors during either connection or query
+		        throw new Error('Error in Post.list: ' + err.message);
 		    });
+	}
+	else {
+		throw new Error('Error in Post.list: Invalid sort parameters');
 	}
 }
 
@@ -54,7 +57,7 @@ Post.create = function*(title, author, content) {
 	    }).then((result) => {
 		    return result[0].insertId;
 	    }).catch((err) => {
-	        console.log(err); // Should catch errors during either connection or query
+	        throw new Error('Error in Post.create: ' + err.message);
 	    });
 }
 
@@ -67,7 +70,7 @@ Post.update = function*(id, title, author, content) {
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
-	        console.log(err); // Should catch errors during either connection or query
+	        throw new Error('Error in Post.update: ' + err.message);
 	    });
 }
 
@@ -78,7 +81,7 @@ Post.delete = function*(id) {
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
-	        console.log(err); // Should catch errors during either connection or query
+	        throw new Error('Error in Post.delete: ' + err.message);
 	    });
 }
 

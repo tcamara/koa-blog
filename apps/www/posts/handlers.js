@@ -4,10 +4,10 @@ const www = module.exports = {};
 const Post = require('./../../../models/post.js');
 
 www.index = function*() {
-	console.log('running index');
-
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
+
+	console.log(this.request.query);
 
 	const postResults = yield Post.list();
 
@@ -63,26 +63,33 @@ www.show = function*() {
 
 	const post = yield Post.get(this.params.id);
 
-	this.render('posts/show', {
-		header: post.title,
-		id: post.id,
-		title: post.title,
-		slug: post.slug,
-		user: post.author,
-		timestamp: post.timestamp,
-		edit_timestamp: post.edit_timestamp,
-		content: post.content,
-		href: postRoutes.url('show', post.id, post.slug),
-	});
+	if(typeof post != 'undefined') {
+		this.render('posts/show', {
+			header: post.title,
+			id: post.id,
+			title: post.title,
+			slug: post.slug,
+			user: post.author,
+			timestamp: post.timestamp,
+			edit_timestamp: post.edit_timestamp,
+			content: post.content,
+			href: postRoutes.url('show', post.id, post.slug),
+		});
+	}
+	else { // the requested post is not defined, display the not found page
+		this.render('posts/notFound', {
+			header: 'Post Not Found',
+		});
+	}
 }
 
 www.update = function*() {
-	Post.update(this.params.id);
+	// Need the router to be able to use named routes for redirecting
+	const postRoutes = require('./routes.js');
 
-	this.render('index', {
-		header: 'Update',
-		content: 'testing',
-	});
+	Post.update(this.params.id, this.params.title, this.params.author, this.params.content);
+
+	this.redirect(postRoutes.url('show', this.params.id));
 }
 
 www.delete = function*() {
