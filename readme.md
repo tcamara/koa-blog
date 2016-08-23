@@ -12,6 +12,8 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 ```
 2. Create the tables specified in createTables.sql
 3. (Optional) use the data specified in populateTestData.sql to populate test data
+4. Create the file `.env` in this project's root directory
+5. Populate the file with the required env variables (just the ones in mysql.js for now), using the values from step 1
 
 
 ## Routes:
