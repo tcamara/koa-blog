@@ -1,18 +1,22 @@
 const www = module.exports = {};
 
-// Set up user model
+// Set up post model
 const Post = require('./../../../models/post.js');
 
 www.index = function*() {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
-	console.log(this.request.query);
-
-	const postResults = yield Post.list();
+	const postResults = yield Post.list(
+		this.request.query.page, 
+		this.request.query.sort, 
+		this.request.query.q
+	);
 
 	const posts = [];
 	for(let i = 0; i < postResults.length; i++) {
+		const postLink = postRoutes.url('show', postResults[i].id, postResults[i].slug);
+
 		posts.push({
 			id: postResults[i].id,
 			title: postResults[i].title,
@@ -21,7 +25,7 @@ www.index = function*() {
 			timestamp: postResults[i].timestamp,
 			edit_timestamp: postResults[i].edit_timestamp,
 			content: postResults[i].content,
-			href: postRoutes.url('show', postResults[i].id, postResults[i].slug),
+			href: postLink,
 		});
 	}
 
@@ -87,7 +91,12 @@ www.update = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
-	Post.update(this.params.id, this.params.title, this.params.author, this.params.content);
+	Post.update(
+		this.params.id, 
+		this.params.title, 
+		this.params.author, 
+		this.params.content
+	);
 
 	this.redirect(postRoutes.url('show', this.params.id));
 }

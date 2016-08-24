@@ -12,9 +12,11 @@ const validSortColumns = {
 };
 
 Post.get = function*(id) {
+	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
+
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query('SELECT * FROM `Post` WHERE `id` = ?', id);
+	        const queryResult = connection.query(queryString, id);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -24,34 +26,30 @@ Post.get = function*(id) {
 	    });
 }
 
-Post.list = function*(page = 0, orderBy = 'id', direction = 'DESC') {
+Post.list = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * postsPerPage;
-
-	if(validSortColumns[orderBy] && (direction == 'ASC' || direction == 'DESC')) {
-		const queryString = 'SELECT * FROM `Post` ORDER BY `' + orderBy + '` ' + direction + ' LIMIT ? OFFSET ?';
-		
-		return yield global.connectionPool.getConnection()
-		    .then((connection) => {
-		        const queryResult = connection.query(queryString, [postsPerPage, offset]);
-		        connection.release();
-		        return queryResult;
-		    }).then((result) => {
-		        return result[0];
-		    }).catch((err) => {
-		        throw new Error('Error in Post.list: ' + err.message);
-		    });
-	}
-	else {
-		throw new Error('Error in Post.list: Invalid sort parameters');
-	}
+	const orderString = parseSortParam(sort);
+	const queryString = 'SELECT * FROM `Post` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
+	
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString, [postsPerPage, offset]);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
+	    }).catch((err) => {
+	        throw new Error('Error in Post.list: ' + err.message);
+	    });
 }
 
 Post.create = function*(title, author, content) {
 	const slug = slugify(title);
+	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `author`, `timestamp`, `content`) VALUES (?, ?, ?, now(), ?)';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query('INSERT INTO `Post` (`title`, `slug`, `author`, `timestamp`, `content`) VALUES (?, ?, ?, now(), ?)', [title, slug, author, content]);
+	        const queryResult = connection.query(queryString, [title, slug, author, content]);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -63,10 +61,11 @@ Post.create = function*(title, author, content) {
 
 Post.update = function*(id, title, author, content) {
 	const slug = slugify(title);
+	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `author` = ?, `edit_timestamp` = now(), `content` = ? WHERE `id` = ?';
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query('UPDATE `Post` SET `title` = ?, `slug` = ?, `author` = ?, `edit_timestamp` = now(), `content` = ? WHERE `id` = ?', [title, slug, author, content, id]);
+	        const queryResult = connection.query(queryString, [title, slug, author, content, id]);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
@@ -75,9 +74,11 @@ Post.update = function*(id, title, author, content) {
 }
 
 Post.delete = function*(id) {
+	const queryString = 'DELETE FROM `Post` WHERE `id` = ?';
+
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query('DELETE FROM `Post` WHERE `id` = ?', id);
+	        const queryResult = connection.query(queryString, id);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
@@ -87,4 +88,29 @@ Post.delete = function*(id) {
 
 function slugify(title) {
 	return title.replace(/ /g, '-').toLowerCase();
+}
+
+function parseSortParam(queryStringChunk) {
+	const items = queryStringChunk.split(',');
+	const orderBy = [];
+
+	for(let item of items) {
+		let direction = '';
+
+		// Starting with a '-' indicates a DESC order for this field
+		if(item.charAt(0) === '-') {
+			direction = ' DESC'
+			item = item.substr(1); // Strip '-' character
+		}
+
+		// Ensure that only columns we want to be sortable are accepted
+		if(validSortColumns[item]) {
+			orderBy.push('`' + item + '`' + direction); 
+		}
+		else {
+			throw new Error('Error in parseSortParam: Invalid column for sorting');
+		}
+	}
+
+	return orderBy.join(', ');
 }
