@@ -1,14 +1,14 @@
 const koa = require('koa');
-const Pug = require('koa-pug');
+const handlebars = require('koa-handlebars');
 const app = module.exports = koa();
 
-// Initialize pug for templating
-const pug = new Pug({
-    viewPath: './apps/www/views',
-    pretty: true,
-});
-
-app.use(pug.middleware);
+// Initialize handlebars for templating
+app.use(handlebars({
+	defaultLayout: "main",
+	cache: false, // TODO: remove when not in dev
+	root: __dirname,
+	layoutsDir: 'views/layouts'
+}));
 
 // Add in routes for this subapp
 app.use(require('./routes.js').middleware());

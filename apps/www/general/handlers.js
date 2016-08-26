@@ -1,9 +1,9 @@
 const www = module.exports = {};
 
 www.index = function*() {
-	this.render('general/index', {
+	yield this.render('general/index', {
 		title: 'Index',
-		header: 'Index',
+		content: 'Index content',
 	});
 };
 
