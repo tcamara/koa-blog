@@ -29,7 +29,7 @@ www.index = function*() {
 		});
 	}
 
-	this.render('posts/list', {
+	yield this.render('posts/list', {
 		title: 'Posts',
 		header: 'Posts',
 		posts,
@@ -40,7 +40,7 @@ www.new = function*() {
 	// Need the router to be able to use named routes for the form action
 	const postRoutes = require('./routes.js');
 
-	this.render('posts/new', {
+	yield this.render('posts/new', {
 		title: 'New Post',
 		header: 'New Post',
 		content: 'testing',
@@ -68,7 +68,7 @@ www.show = function*() {
 	const post = yield Post.get(this.params.id);
 
 	if(typeof post != 'undefined') {
-		this.render('posts/show', {
+		yield this.render('posts/show', {
 			header: post.title,
 			id: post.id,
 			title: post.title,
@@ -81,7 +81,7 @@ www.show = function*() {
 		});
 	}
 	else { // the requested post is not defined, display the not found page
-		this.render('posts/notFound', {
+		yield this.render('posts/notFound', {
 			header: 'Post Not Found',
 		});
 	}

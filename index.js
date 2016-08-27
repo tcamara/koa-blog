@@ -2,9 +2,10 @@
 require('dotenv').config();
 
 const koa = require('koa');
+const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const mount = require('koa-mount');
-const bodyParser = require('koa-bodyparser');
+const serve = require('koa-static');
 const mysql = require('./mysql');
 const app = koa();
 
@@ -25,6 +26,8 @@ app.use(function *(next) {
 	const ms = new Date - start;
 	this.set('X-Response-Time', ms + 'ms');
 });
+
+app.use(serve('./public'));
 
 // Top-Level Error Handling
 app.use(function *(next) {

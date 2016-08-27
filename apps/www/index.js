@@ -7,7 +7,15 @@ app.use(handlebars({
 	defaultLayout: "main",
 	cache: false, // TODO: remove when not in dev
 	root: __dirname,
-	layoutsDir: 'views/layouts'
+	layoutsDir: 'views/layouts',
+	helpers: {
+		masthead: function() {
+			return "LOGO";
+		},
+		copyrightYear: function() {
+			return new Date().getFullYear();
+		}
+	}
 }));
 
 // Add in routes for this subapp
