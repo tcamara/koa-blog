@@ -9,8 +9,8 @@ app.use(handlebars({
 	root: __dirname,
 	layoutsDir: 'views/layouts',
 	helpers: {
-		masthead: function() {
-			return "LOGO";
+		blogName: function() {
+			return global.settings.blogName;
 		},
 		copyrightYear: function() {
 			return new Date().getFullYear();

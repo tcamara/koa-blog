@@ -7,6 +7,7 @@ const logger = require('koa-logger');
 const mount = require('koa-mount');
 const serve = require('koa-static');
 const mysql = require('./mysql');
+const Setting = require('./models/setting.js');
 const app = koa();
 
 // Include each sub-application
@@ -28,6 +29,18 @@ app.use(function *(next) {
 });
 
 app.use(serve('./public'));
+
+// Load up the Setting table into a global object
+app.use(function *(next) {
+	const settings = yield Setting.getAll();
+	global.settings = {};
+
+	for(let setting of settings) {
+		global.settings[setting.key] = setting.value;
+	}
+
+	yield next;
+});
 
 // Top-Level Error Handling
 app.use(function *(next) {

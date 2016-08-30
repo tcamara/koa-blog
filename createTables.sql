@@ -8,7 +8,7 @@ CREATE TABLE `Post` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `content` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `Post_Tag`;
 
@@ -16,7 +16,7 @@ CREATE TABLE `Post_Tag` (
   `post_id` int(11) NOT NULL,
   `tag_id` int(11) NOT NULL,
   PRIMARY KEY (`post_id`,`tag_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `Tag`;
 
@@ -26,7 +26,7 @@ CREATE TABLE `Tag` (
   `slug` varchar(50) NOT NULL,
   `num_posts` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `User`;
 
@@ -38,4 +38,12 @@ CREATE TABLE `User` (
   `password` varchar(100) NOT NULL,
   `bio` TEXT NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `Settings`;
+
+CREATE TABLE `Setting` (
+  `key` varchar(100) NOT NULL,
+  `value` TEXT NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

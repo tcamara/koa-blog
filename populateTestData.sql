@@ -6,3 +6,5 @@ INSERT INTO `Post_Tag` VALUES (1,1);
 INSERT INTO `Tag` VALUES (1,'Test Tag','test-tag',1);
 
 INSERT INTO `User` VALUES (1,'Tim Camara','tcamara21@gmail.com',1,'test','This is a bio about me.');
+
+INSERT INTO `Setting` VALUES ('blogName', 'Test Blog');
