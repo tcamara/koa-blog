@@ -24,7 +24,7 @@ CREATE TABLE `Tag` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `slug` varchar(50) NOT NULL,
-  `num_posts` int(11) NOT NULL,
+  `num_posts` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -34,7 +34,7 @@ CREATE TABLE `User` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `num_posts` int(11) NOT NULL,
+  `num_posts` int(11) NOT NULL DEFAULT 0,
   `password` varchar(100) NOT NULL,
   `bio` TEXT NOT NULL,
   PRIMARY KEY (`id`)
