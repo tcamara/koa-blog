@@ -18,121 +18,76 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 
 ## Routes:
 
+Guest
+Member
+Author
+Editor
+Admin
+
+
+
 ### General
 
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /                   | GET /               | show homepage          |
-| /:page              | GET /:page          | show other named pages |
-| /:page/update       | POST /:page         | update named pages     |
-| /:page/delete       | DELETE /:page       | delete named pages     |
-| /session            | POST /session       | log user in            |
-| /session/delete     | DELETE /session     | log user out           |
+| Route                  | Permissions | Description            |
+| ---------------------- | ----------- | ---------------------- |
+| GET /                  | Guest       | show homepage          |
+| POST /session          | Guest       | log user in            |
+| DELETE /session        | Member      | log user out           |
 
 ### Posts
 
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /posts              | GET /posts          | show post list         |
-| /posts/new          | N/A                 | show create post page  |
-| /posts/create       | POST /posts         | create post submission |
-| /posts/:id/:slug    | GET /posts/:id      | show single post       |
-| /posts/:id/update   | POST /posts/:id     | update post submission |
-| /posts/:id/delete   | DELETE /posts/:id   | delete post submission |
+| Route                             | Permissions | Description            |
+| --------------------------------- | ----------- | ---------------------- |
+| GET /posts                        | Guest       | show post list         |
+| GET /posts/new                    | Guest       | show create post page  |
+| POST /posts                       | Member      | create post submission |
+| GET /posts/:postId/[:slug]        | Guest       | show single post       |
+| POST /posts/:postId               | Guest       | update post submission |
+| DELETE /posts/:postId             | Member      | delete post submission |
+| GET /posts/tags/:postId           | Guest       | get posts by tag       |
+| POST /posts/:postId/tags/:tagId   | Guest       | add tag to post        |
+| DELETE /posts/:postId/tags/:tagId | Member      | remove tag from post   |
 
-#### Post Query Parameters (for /posts only)
+### Users
 
-| Key  | Possible Values | Description |
-| ---- | --------------- | ----------- |
-| q    | any string      | search term |
+| Route                      | Permissions | Description            |
+| -------------------------- | ----------- | ---------------------- |
+| GET /users                 | Guest       | show user list         |
+| GET /users/new             | Guest       | show create user page  |
+| POST /users                | Member      | create user submission |
+| GET /users/:userId/[:slug] | Guest       | show single user       |
+| POST /users/:userId        | Guest       | update user submission |
+| DELETE /users/:userId      | Member      | delete user submission |
+
+### Tags
+
+| Route                             | Permissions | Description            |
+| --------------------------------- | ----------- | ---------------------- |
+| GET /tags                         | Guest       | show tag list          |
+| GET /tags/new                     | Guest       | show create tag page   |
+| POST /tags                        | Member      | create tag submission  |
+| GET /tags/:tagId/[:slug]          | Guest       | show single tag        |
+| POST /tags/:tagId                 | Guest       | update tag submission  |
+| DELETE /tags/:tagId               | Member      | delete tag submission  |
+| GET /tags/posts/:tagId            | Guest       | get posts by tag       |
+| POST /tags/:tagId/posts/:postId   | Guest       | add tag to post        |
+| DELETE /tags/:tagId/posts/:postId | Member      | remove tag from post   |
+
+### Custom Pages
+
+| Route                  | Permissions | Description            |
+| ---------------------- | ----------- | ---------------------- |
+| GET /pages             | Guest       | show page list         |
+| GET /pages/new         | Guest       | show create page page  |
+| POST /pages            | Member      | create page submission |
+| GET /:page             | Guest       | show page              |
+| POST /:page            | Guest       | update pages           |
+| DELETE /:page          | Member      | delete pages           |
+
+#### Query Parameters (for list routes only)
+
+| Key  | Possible Values     | Description |
+| ---- | ------------------- | ----------- |
+| q    | any string          | search term |
+| page | any counting number | pagination  |
 | sort | comma-separated list of any of the validSortColumns, each of which may be optionally prefaced with a '-' to indicate reverse ordering | sort order for returned results |
-| page | any integer     | pagination |
-
-what about showing posts by category, or search terms?
-
-### Users
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /users              | GET /users          | show user list         |
-| /users/new          | N/A                 | show create user page  |
-| /users/create       | POST /users         | create user submission |
-| /users/:id/:slug    | GET /users/:id      | show single user       |
-| /users/:id/update   | POST /users/:id     | update user submission |
-| /users/:id/delete   | DELETE /users/:id   | delete user submission |
-
-### Tags
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /tags               | GET /tags           | show tag list          |
-| /tags/new           | N/A                 | show create tag page   |
-| /tags/create        | POST /tags          | create tag submission  |
-| /tags/:id/:slug     | GET /tags/:id       | show single tag        |
-| /tags/:id/update    | POST /tags/:id      | update tag submission  |
-| /tags/:id/delete    | DELETE /tags/:id    | delete tag submission  |
-# koa-blog
-A simple blog platform using Koa rather than express
-
-## To get started
-1. Create a new database and database user (feel free to change details):
-```
-CREATE DATABASE `blog`;
-
-CREATE USER 'blog_user'@'localhost' IDENTIFIED BY 'bad_password';
-
-GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
-```
-2. Create the tables specified in createTables.sql
-3. (Optional) use the data specified in populateTestData.sql to populate test data
-4. Create the file `.env` in this project's root directory
-5. Populate the file with the required env variables (just the ones in mysql.js for now), using the values from step 1
-
-
-## Routes:
-
-### General
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /                   | GET /               | show homepage          |
-| /:page              | GET /:page          | show other named pages |
-| /:page/update       | POST /:page         | update named pages     |
-| /:page/delete       | DELETE /:page       | delete named pages     |
-| /session            | POST /session       | log user in            |
-| /session/delete     | DELETE /session     | log user out           |
-
-### Posts
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /posts              | GET /posts          | show post list         |
-| /posts/new          | N/A                 | show create post page  |
-| /posts/create       | POST /posts         | create post submission |
-| /posts/:id/:slug    | GET /posts/:id      | show single post       |
-| /posts/:id/update   | POST /posts/:id     | update post submission |
-| /posts/:id/delete   | DELETE /posts/:id   | delete post submission |
-
-what about showing posts by category, or search terms?
-
-### Users
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /users              | GET /users          | show user list         |
-| /users/new          | N/A                 | show create user page  |
-| /users/create       | POST /users         | create user submission |
-| /users/:id/:slug    | GET /users/:id      | show single user       |
-| /users/:id/update   | POST /users/:id     | update user submission |
-| /users/:id/delete   | DELETE /users/:id   | delete user submission |
-
-### Tags
-
-| Route               | API Call            | Description            |
-| ------------------- | ------------------- | ---------------------- |
-| /tags               | GET /tags           | show tag list          |
-| /tags/new           | N/A                 | show create tag page   |
-| /tags/create        | POST /tags          | create tag submission  |
-| /tags/:id/:slug     | GET /tags/:id       | show single tag        |
-| /tags/:id/update    | POST /tags/:id      | update tag submission  |
-| /tags/:id/delete    | DELETE /tags/:id    | delete tag submission  |
