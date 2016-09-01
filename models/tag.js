@@ -84,6 +84,7 @@ Tag.delete = function*(id) {
 }
 
 function slugify(name) {
+	console.log(name);
 	return name.replace(/ /g, '-').toLowerCase();
 }
 

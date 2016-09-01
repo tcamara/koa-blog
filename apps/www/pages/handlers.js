@@ -14,17 +14,17 @@ www.index = function*() {
 	);
 
 	const posts = [];
-	for(let post of postResults) {
-		const postLink = postRoutes.url('show', post.id, post.slug);
+	for(let i = 0; i < postResults.length; i++) {
+		const postLink = postRoutes.url('show', postResults[i].id, postResults[i].slug);
 
 		posts.push({
-			id: post.id,
-			title: post.title,
-			slug: post.slug,
-			user: post.author,
-			timestamp: post.timestamp,
-			edit_timestamp: post.edit_timestamp,
-			content: post.content,
+			id: postResults[i].id,
+			title: postResults[i].title,
+			slug: postResults[i].slug,
+			user: postResults[i].author,
+			timestamp: postResults[i].timestamp,
+			edit_timestamp: postResults[i].edit_timestamp,
+			content: postResults[i].content,
 			href: postLink,
 		});
 	}
@@ -43,6 +43,7 @@ www.new = function*() {
 	yield this.render('posts/new', {
 		title: 'New Post',
 		header: 'New Post',
+		content: 'testing',
 		action: postRoutes.url('create')
 	});
 };
@@ -64,7 +65,7 @@ www.show = function*() {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
-	const post = yield Post.get(this.params.postId);
+	const post = yield Post.get(this.params.id);
 
 	if(typeof post != 'undefined') {
 		yield this.render('posts/show', {
@@ -91,35 +92,20 @@ www.update = function*() {
 	const postRoutes = require('./routes.js');
 
 	Post.update(
-		this.params.postId, 
+		this.params.id, 
 		this.params.title, 
 		this.params.author, 
 		this.params.content
 	);
 
-	this.redirect(postRoutes.url('show', this.params.postId));
+	this.redirect(postRoutes.url('show', this.params.id));
 };
 
 www.delete = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
-	Post.delete(this.params.postId);
+	Post.delete(this.params.id);
 
 	this.redirect(postRoutes.url('index'));
-};
-
-// TODO: index, but only within the given tag
-www.tag = function*() {
-	
-};
-
-// TODO: add a tag to a post
-www.addTag = function*() {
-	
-};
-
-// TODO: remove a tag from a post
-www.removeTag = function*() {
-	
 };

@@ -1,5 +1,5 @@
 # koa-blog
-A simple blog platform using Koa rather than express
+A simple blog platform using Koa rather than Express
 
 ## To get started
 1. Create a new database and database user (feel free to change details):
@@ -18,14 +18,6 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 
 ## Routes:
 
-Guest
-Member
-Author
-Editor
-Admin
-
-
-
 ### General
 
 | Route                  | Permissions | Description            |
@@ -39,14 +31,14 @@ Admin
 | Route                             | Permissions | Description            |
 | --------------------------------- | ----------- | ---------------------- |
 | GET /posts                        | Guest       | show post list         |
-| GET /posts/new                    | Guest       | show create post page  |
+| GET /posts/new                    | Member      | show create post page  |
 | POST /posts                       | Member      | create post submission |
 | GET /posts/:postId/[:slug]        | Guest       | show single post       |
-| POST /posts/:postId               | Guest       | update post submission |
-| DELETE /posts/:postId             | Member      | delete post submission |
-| GET /posts/tags/:postId           | Guest       | get posts by tag       |
-| POST /posts/:postId/tags/:tagId   | Guest       | add tag to post        |
-| DELETE /posts/:postId/tags/:tagId | Member      | remove tag from post   |
+| POST /posts/:postId               | Member*     | update post submission |
+| DELETE /posts/:postId             | Member*     | delete post submission |
+| GET /posts/tags/:tagId            | Guest       | get posts by tag       |
+| POST /posts/:postId/tags/:tagId   | Member*     | add tag to post        |
+| DELETE /posts/:postId/tags/:tagId | Member*     | remove tag from post   |
 
 ### Users
 
@@ -54,35 +46,35 @@ Admin
 | -------------------------- | ----------- | ---------------------- |
 | GET /users                 | Guest       | show user list         |
 | GET /users/new             | Guest       | show create user page  |
-| POST /users                | Member      | create user submission |
+| POST /users                | Guest       | create user submission |
 | GET /users/:userId/[:slug] | Guest       | show single user       |
-| POST /users/:userId        | Guest       | update user submission |
-| DELETE /users/:userId      | Member      | delete user submission |
+| POST /users/:userId        | Member*     | update user submission |
+| DELETE /users/:userId      | Member*     | delete user submission |
 
 ### Tags
 
 | Route                             | Permissions | Description            |
 | --------------------------------- | ----------- | ---------------------- |
 | GET /tags                         | Guest       | show tag list          |
-| GET /tags/new                     | Guest       | show create tag page   |
+| GET /tags/new                     | Member      | show create tag page   |
 | POST /tags                        | Member      | create tag submission  |
-| GET /tags/:tagId/[:slug]          | Guest       | show single tag        |
-| POST /tags/:tagId                 | Guest       | update tag submission  |
-| DELETE /tags/:tagId               | Member      | delete tag submission  |
-| GET /tags/posts/:tagId            | Guest       | get posts by tag       |
-| POST /tags/:tagId/posts/:postId   | Guest       | add tag to post        |
-| DELETE /tags/:tagId/posts/:postId | Member      | remove tag from post   |
+| GET /tags/:tagId/[:slug]          | Guest       | show single tag?       |
+| POST /tags/:tagId                 | Editor      | update tag submission  |
+| DELETE /tags/:tagId               | Editor      | delete tag submission  |
+| GET /tags/:tagId/posts            | Guest       | get posts by tag       |
+| POST /tags/:tagId/posts/:postId   | Member*     | add tag to post        |
+| DELETE /tags/:tagId/posts/:postId | Member*     | remove tag from post   |
 
-### Custom Pages
+### Pages
 
 | Route                  | Permissions | Description            |
 | ---------------------- | ----------- | ---------------------- |
 | GET /pages             | Guest       | show page list         |
-| GET /pages/new         | Guest       | show create page page  |
-| POST /pages            | Member      | create page submission |
+| GET /pages/new         | Admin       | show create page page  |
+| POST /pages            | Admin       | create page submission |
 | GET /:page             | Guest       | show page              |
-| POST /:page            | Guest       | update pages           |
-| DELETE /:page          | Member      | delete pages           |
+| POST /:page            | Admin       | update pages           |
+| DELETE /:page          | Admin       | delete pages           |
 
 #### Query Parameters (for list routes only)
 
@@ -91,3 +83,14 @@ Admin
 | q    | any string          | search term |
 | page | any counting number | pagination  |
 | sort | comma-separated list of any of the validSortColumns, each of which may be optionally prefaced with a '-' to indicate reverse ordering | sort order for returned results |
+
+## Permissions Levels
+
+| Level | Abilities |
+| ----- | --------- |
+| Guest | Reading, creating an account |
+| Member | Creating content, modifying own content |
+| Editor | Modifying other member's content, editing existing tags |
+| Admin | Everything |
+
+'*' on permissions indicates only applicable for 'owned' resources

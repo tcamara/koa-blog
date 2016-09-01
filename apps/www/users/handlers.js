@@ -18,32 +18,32 @@ www.new = function*() {
 		header: 'New',
 		content: 'testing',
 	});
-}
+};
 
 www.create = function*() {
 	this.render('index', {
 		header: 'Create',
 		content: 'testing',
 	});
-}
+};
 
 www.show = function*() {
 	this.render('index', {
 		header: 'Show',
 		content: 'testing',
 	});
-}
+};
 
 www.update = function*() {
 	this.render('index', {
 		header: 'Update',
 		content: 'testing',
 	});
-}
+};
 
 www.delete = function*() {
 	this.render('index', {
 		header: 'Delete',
 		content: 'testing',
 	});
-}
+};

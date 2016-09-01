@@ -6,11 +6,3 @@ www.index = function*() {
 		content: 'Index content',
 	});
 };
-
-www.page = function*() {
-	this.render('general/page', {
-		title: 'Page',
-		header: 'Page',
-		content: 'Content',
-	});
-}

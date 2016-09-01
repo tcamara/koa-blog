@@ -1,25 +1,34 @@
 const Router = require('koa-router');
 
-const postRouter = new Router();
+const tagRouter = new Router();
 
 const www = require('./handlers.js');
 
-// Show post list
-postRouter.get('/', www.index);
+// Show tag list
+tagRouter.get('index', '/', www.index);
 
-// Show create post page
-postRouter.get('/new', www.new);
+// Show create tag page
+tagRouter.get('new', '/new', www.new);
 
-// Create post submission
-postRouter.post('/create', www.create);
+// Create tag submission
+tagRouter.post('create', '/', www.create);
 
-// Show single post
-postRouter.get('/:id', www.show);
+// Show single tag
+tagRouter.get('show', '/:tagId/:slug?', www.show);
 
-// Update post submission
-postRouter.post('/:id/update', www.update);
+// Update tag submission
+tagRouter.post('update', '/:tagId', www.update);
 
-// Delete post submission
-postRouter.post('/:id/delete', www.delete);
+// Delete tag submission
+tagRouter.delete('delete', '/:tagId', www.delete);
 
-module.exports = postRouter;
+// Get posts by tag
+tagRouter.get('tag', '/:tagId/posts', www.tag);
+
+// Add tag to post
+tagRouter.post('addTag', '/:tagId/posts/:postId', www.addTag);
+
+// Remove tag from post
+tagRouter.delete('removeTag', '/:tagId/posts/:postId', www.removeTag);
+
+module.exports = tagRouter;

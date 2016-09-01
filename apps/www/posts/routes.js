@@ -11,15 +11,24 @@ postRouter.get('index', '/', www.index);
 postRouter.get('new', '/new', www.new);
 
 // Create post submission
-postRouter.post('create', '/create', www.create);
+postRouter.post('create', '/', www.create);
 
 // Show single post
-postRouter.get('show', '/:id/:slug?', www.show);
+postRouter.get('show', '/:postId/:slug?', www.show);
 
 // Update post submission
-postRouter.post('update', '/:id/update', www.update);
+postRouter.post('update', '/:postId', www.update);
 
 // Delete post submission
-postRouter.post('delete', '/:id/delete', www.delete);
+postRouter.delete('delete', '/:postId', www.delete);
+
+// Get posts by tag
+postRouter.get('tag', '/tags/:tagId', www.tag);
+
+// Add tag to post
+postRouter.post('addTag', '/:postId/tags/:tagId', www.addTag);
+
+// Remove tag from post
+postRouter.delete('removeTag', '/:postId/tags/:tagId', www.removeTag);
 
 module.exports = postRouter;
