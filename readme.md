@@ -86,11 +86,11 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 
 ## Permissions Levels
 
-| Level | Abilities |
-| ----- | --------- |
-| Guest | Reading, creating an account |
-| Member | Creating content, modifying own content |
+| Level  | Abilities                                               |
+| ------ | ------------------------------------------------------- |
+| Guest  | Reading, creating an account                            |
+| Member | Creating content, modifying own content                 |
 | Editor | Modifying other member's content, editing existing tags |
-| Admin | Everything |
+| Admin  | Everything                                              |
 
 '*' on permissions indicates only applicable for 'owned' resources

@@ -4,17 +4,20 @@
     	<meta charset="utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1">
     	<title>{{title}}</title>
+    	<link rel="stylesheet" href="css/reset.css">
     	<link rel="stylesheet" href="css/main.css">
 	</head>
 	<body>
 		<header>
-			<span class="blogName">{{blogName}}</span>
+			<a href="/" class="blogName">{{blogName}}</a>
 			<div class="menu">
 
 			</div>
 		</header>
 
-		{{{@body}}}
+		<main>
+			{{{@body}}}
+		</main>
 
 		<footer>
 		© {{copyrightYear}} Tim Camara
