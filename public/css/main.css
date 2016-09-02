@@ -2,16 +2,25 @@ body {
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	font-size: 16px;
+	font-size: 1.6rem;
 }
 
 header {
-	border-bottom: 1px solid black;
-	padding 10px;
+	background-image: url('/images/road.jpg');
+	background-size: cover;
+	background-position: center center;
+	height: 300px;
+}
+
+.blogName {
+	text-decoration: none;
+	font-size: 2rem;
 }
 
 main {
-	background-color: green;
 	flex: 1;
+	padding: 10px;
 }
 
 footer {

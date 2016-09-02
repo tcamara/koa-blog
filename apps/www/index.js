@@ -12,6 +12,9 @@ app.use(handlebars({
 		blogName: function() {
 			return global.settings.blogName;
 		},
+		blogTagLine: function() {
+			return global.settings.blogTagLine;
+		},
 		copyrightYear: function() {
 			return new Date().getFullYear();
 		}
