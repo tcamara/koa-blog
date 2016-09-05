@@ -1,4 +1,7 @@
 const Router = require('koa-router');
+const koaBody = require('koa-body')({
+	multipart: true
+});
 
 const tagRouter = new Router();
 
@@ -11,13 +14,13 @@ tagRouter.get('index', '/', www.index);
 tagRouter.get('new', '/new', www.new);
 
 // Create tag submission
-tagRouter.post('create', '/', www.create);
+tagRouter.post('create', '/', koaBody, www.create);
 
 // Show single tag
 tagRouter.get('show', '/:tagId/:slug?', www.show);
 
 // Update tag submission
-tagRouter.post('update', '/:tagId', www.update);
+tagRouter.post('update', '/:tagId', koaBody, www.update);
 
 // Delete tag submission
 tagRouter.delete('delete', '/:tagId', www.delete);

@@ -21,7 +21,7 @@ www.index = function*() {
 			id: tag.id,
 			name: tag.name,
 			slug: tag.slug,
-			num_posts: tag.num_posts,
+			numPosts: tag.numPosts,
 			href: tagLink,
 		});
 	}
@@ -67,7 +67,7 @@ www.show = function*() {
 			slug: tag.slug,
 			user: tag.author,
 			timestamp: tag.timestamp,
-			edit_timestamp: tag.edit_timestamp,
+			editTimestamp: tag.editTimestamp,
 			content: tag.content,
 			href: tagRoutes.url('show', tag.id, tag.slug),
 		});

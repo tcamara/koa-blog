@@ -23,7 +23,7 @@ www.index = function*() {
 			slug: postResults[i].slug,
 			user: postResults[i].author,
 			timestamp: postResults[i].timestamp,
-			edit_timestamp: postResults[i].edit_timestamp,
+			editTimestamp: postResults[i].editTimestamp,
 			content: postResults[i].content,
 			href: postLink,
 		});
@@ -75,7 +75,7 @@ www.show = function*() {
 			slug: post.slug,
 			user: post.author,
 			timestamp: post.timestamp,
-			edit_timestamp: post.edit_timestamp,
+			editTimestamp: post.editTimestamp,
 			content: post.content,
 			href: postRoutes.url('show', post.id, post.slug),
 		});

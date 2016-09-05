@@ -1,3 +1,12 @@
 {{#each posts}}
-	<a href="{{this.href}}">{{this.title}}</a><br />
+	<div class="post">
+		<a href="{{this.href}}">
+			<img src="{{this.image}}" />
+			<h2>{{this.title}}</h2>
+			posted at {{this.timestamp}} by {{this.author.name}}
+			{{#each this.tags}}
+				{{this.name}}
+			{{/each}}
+		</a>
+	</div>
 {{/each}}

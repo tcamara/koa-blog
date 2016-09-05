@@ -1,4 +1,7 @@
 const Router = require('koa-router');
+const koaBody = require('koa-body')({
+	multipart: true
+});
 
 const postRouter = new Router();
 
@@ -11,13 +14,13 @@ postRouter.get('/', www.index);
 postRouter.get('/new', www.new);
 
 // Create post submission
-postRouter.post('/create', www.create);
+postRouter.post('/create', koaBody, www.create);
 
 // Show single post
 postRouter.get('/:id', www.show);
 
 // Update post submission
-postRouter.post('/:id/update', www.update);
+postRouter.post('/:id/update', koaBody, www.update);
 
 // Delete post submission
 postRouter.post('/:id/delete', www.delete);

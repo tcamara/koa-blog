@@ -5,7 +5,7 @@ const validSortColumns = {
 	'id': 1,
 	'name': 1,
 	'slug': 1,
-	'num_posts': 1
+	'numPosts': 1
 };
 
 Tag.get = function*(id) {
@@ -20,6 +20,22 @@ Tag.get = function*(id) {
 	        return result[0][0];
 	    }).catch((err) => {
 	    	throw new Error('Error in Tag.get: ' + err.message);
+	    });
+}
+
+// Should only be used internally
+Tag._list = function*(tagIds) {
+	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
+	
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
+	    }).catch((err) => {
+	        throw new Error('Error in Tag._list: ' + err.message);
 	    });
 }
 
@@ -84,7 +100,6 @@ Tag.delete = function*(id) {
 }
 
 function slugify(name) {
-	console.log(name);
 	return name.replace(/ /g, '-').toLowerCase();
 }
 

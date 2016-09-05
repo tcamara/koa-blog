@@ -1,13 +1,21 @@
 const Post = module.exports = {};
 
+const fs = require('fs');
+const path = require('path');
+const PostTag = require('./postTag.js');
+const Tag = require('./tag.js');
+const User = require('./user.js');
+
+const postImagePath = '/images/posts/';
+const fullPostImagePath = path.join(global.webRoot, postImagePath);
 const postsPerPage = 5;
 const validSortColumns = {
 	'id': 1,
 	'title': 1,
 	'slug': 1,
-	'author': 1,
+	'authorId': 1,
 	'timestamp': 1,
-	'edit_timestamp': 1,
+	'editTimestamp': 1,
 	'content': 0
 };
 
@@ -26,7 +34,9 @@ Post.get = function*(id) {
 	    });
 }
 
-Post.list = function*(page = 0, sort = '-id', searchTerm) {
+// This does no formatting of the post data, and is therefore faster, but should really
+// only be used as a base function to assist with the main list function
+Post.listRaw = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * postsPerPage;
 	const orderString = parseSortParam(sort);
 	const queryString = 'SELECT * FROM `Post` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
@@ -43,13 +53,87 @@ Post.list = function*(page = 0, sort = '-id', searchTerm) {
 	    });
 }
 
-Post.create = function*(title, author, content) {
+Post.list = function*(page = 0, sort = '-id', searchTerm) {
+	// Need the router to be able to use named routes for links
+	const postRoutes = require('./../apps/www/posts/routes.js');
+
+	// Retrieve the list of posts we're looking for
+	const postList = yield Post.listRaw(page, sort, searchTerm);
+
+	// Grab all the post and author IDs
+	const postIds = [];
+	const authorIds = {};
+	for(let post of postList) {
+		postIds.push(post.id);
+		authorIds[post.authorId] = 1;
+	}
+
+	// Get the author data for our posts
+	const userList = yield User._list(Object.keys(authorIds));
+
+	// Get all the tag IDs that are associated with our posts
+	const postTags = yield PostTag.listTagsByPost(postIds);
+
+	// Grab all the tag IDs
+	const tagIds = {};
+	for(let tag of postTags) {
+		tagIds[tag.tagId] = 1;
+	}
+
+	// Get the tag data for all tags associated with our posts
+	const tagList = yield Tag._list(Object.keys(tagIds));
+
+	// TODO: this is a really naive approach, improve it
+	for(let post of postList) {
+		// Handle links
+		post.href = postRoutes.url('show', post.id, post.slug);
+
+		// Handle images
+		post.image = postImagePath + post.image;
+
+		// Handle tags
+		post.tags = [];
+		for(let postTag of postTags) {
+			if(postTag.postId === post.id) {
+				for(let tag of tagList) {
+					if(tag.id === postTag.tagId) {
+						post.tags.push(tag);
+					}
+				}
+			}
+		}
+
+		// Handle author
+		for(let user of userList) {
+			if(user.id === post.authorId) {
+				post.author = user;
+			}
+		}
+	}
+
+	return postList;
+}
+
+function* getTagsForPosts(postList) {
+	const postIds = [];
+	for(let post of postList) {
+		postIds.push(post.id);
+	}
+
+	const test = PostTag.listTagsByPost(postIds);
+	return test;
+}
+
+Post.create = function*(title, authorId, content, image) {
+	// Move uploaded image to correct storage location and return the permanent path
+	yield moveImage(image);
+	
 	const slug = slugify(title);
-	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `author`, `timestamp`, `content`) VALUES (?, ?, ?, now(), ?)';
+	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `authorId`, `timestamp`, `content`, `image`) VALUES (?, ?, ?, now(), ?, ?)';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [title, slug, author, content]);
+	        const queryResult = connection.query(queryString, [title, slug, authorId, content, image.name]);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -59,13 +143,26 @@ Post.create = function*(title, author, content) {
 	    });
 }
 
-Post.update = function*(id, title, author, content) {
+function* moveImage(image) {
+	const source = fs.createReadStream(image.path);
+	const destination = fs.createWriteStream(path.join(fullPostImagePath, image.name));
+
+	source.pipe(destination);
+	source.on('end', function() {
+		fs.unlink(image.path);
+	});
+	source.on('error', function(err) {
+		throw new Error('Error in moveImage: ' + err.message);
+	})
+}
+
+Post.update = function*(id, title, authorId, content) {
 	const slug = slugify(title);
-	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `author` = ?, `edit_timestamp` = now(), `content` = ? WHERE `id` = ?';
+	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `editTimestamp` = now(), `content` = ? WHERE `id` = ?';
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [title, slug, author, content, id]);
+	        const queryResult = connection.query(queryString, [title, slug, authorId, content, id]);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {

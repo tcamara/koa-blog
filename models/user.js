@@ -5,7 +5,7 @@ const validSortColumns = {
 	'id': 1,
 	'name': 1,
 	'email': 1,
-	'num_posts': 1,
+	'numPosts': 1,
 	'bio': 0
 };
 
@@ -21,6 +21,22 @@ User.get = function*(id) {
 	        return result[0][0];
 	    }).catch((err) => {
 	    	throw new Error('Error in User.get: ' + err.message);
+	    });
+}
+
+// Should only be used internally
+User._list = function*(userIds) {
+	const queryString = 'SELECT * FROM `User` WHERE `id` IN (' + userIds.join() + ')';
+	
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
+	    }).catch((err) => {
+	        throw new Error('Error in User._list: ' + err.message);
 	    });
 }
 

@@ -2,32 +2,11 @@ const www = module.exports = {};
 
 // Set up post model
 const Post = require('./../../../models/post.js');
+const PostTag = require('./../../../models/postTag.js');
 
 www.index = function*() {
-	// Need the router to be able to use named routes for links
-	const postRoutes = require('./routes.js');
-
-	const postResults = yield Post.list(
-		this.request.query.page, 
-		this.request.query.sort, 
-		this.request.query.q
-	);
-
-	const posts = [];
-	for(let post of postResults) {
-		const postLink = postRoutes.url('show', post.id, post.slug);
-
-		posts.push({
-			id: post.id,
-			title: post.title,
-			slug: post.slug,
-			user: post.author,
-			timestamp: post.timestamp,
-			edit_timestamp: post.edit_timestamp,
-			content: post.content,
-			href: postLink,
-		});
-	}
+	const query = this.request.query;
+	const posts = yield Post.list(query.page, query.sort, query.q);
 
 	yield this.render('posts/list', {
 		title: 'Posts',
@@ -55,7 +34,7 @@ www.create = function*() {
 
 	// TODO: base this on current user
 	const author = 1;
-	const newPostId = yield Post.create(params.title, author, params.content);
+	const newPostId = yield Post.create(params.fields.title, author, params.fields.content, params.files.image);
 
 	this.redirect(postRoutes.url('show', newPostId));
 };
@@ -74,7 +53,7 @@ www.show = function*() {
 			slug: post.slug,
 			user: post.author,
 			timestamp: post.timestamp,
-			edit_timestamp: post.edit_timestamp,
+			editTimestamp: post.editTimestamp,
 			content: post.content,
 			href: postRoutes.url('show', post.id, post.slug),
 		});
