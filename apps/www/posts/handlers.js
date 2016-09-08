@@ -22,7 +22,8 @@ www.new = function*() {
 	yield this.render('posts/new', {
 		title: 'New Post',
 		header: 'New Post',
-		action: postRoutes.url('create')
+		action: postRoutes.url('create'),
+		hasEditor: true,
 	});
 };
 

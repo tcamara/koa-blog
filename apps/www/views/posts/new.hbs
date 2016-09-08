@@ -1,11 +1,6 @@
 <form method="post" action="{{action}}" enctype="multipart/form-data">
 	<input type="text" name="title" placeholder="Title" /><br />
-	<textarea name="content" id="postContents"></textarea><br />
+	<textarea name="content" class="contentEditable"></textarea><br />
 	<input type="file" name="image" accept="image/*">
 	<input type="submit" value="Submit" />
 </form>
-
-<script src="//cdn.ckeditor.com/4.5.10/full/ckeditor.js"></script>
-<script>
-    CKEDITOR.replace('content');
-</script>

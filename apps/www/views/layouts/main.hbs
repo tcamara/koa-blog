@@ -7,8 +7,9 @@
     	<link rel="stylesheet" href="/css/reset.css">
     	<link rel="stylesheet" href="/css/main.css">
     	<link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
-    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    	{{#if hasEditor}}
+			<link rel="stylesheet" href="/vendor/medium-editor/dist/css/medium-editor.min.css">
+		{{/if}}
 	</head>
 	<body>
 		<header>
@@ -28,5 +29,27 @@
 		<footer>
 			© {{copyrightYear}} Tim Camara
 		</footer>
+
+		{{#if hasEditor}}
+			<script src="/vendor/medium-editor/dist/js/medium-editor.min.js"></script>
+			<script>
+				var editor = new MediumEditor('.contentEditable', {
+					buttons: [
+						'bold',
+						'italic',
+						'underline',
+						'quote',
+						'anchor',
+						'h2',
+						'h3',
+						'justifyLeft',
+					],
+					placeholder: {
+						text: 'Witticisms go here...',
+						hideOnClick: false,
+					}
+				});
+			</script>
+		{{/if}}
 	</body>
 </html>
