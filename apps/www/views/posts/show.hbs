@@ -1,5 +1,19 @@
-<h1>{{title}}</h1>
+<div class="post inner">
+	<h1>{{post.title}}</h1>
 
-<div class='postContents'>
-	{{{content}}}
+	<div class="byline">
+		By <a href="">{{post.author.name}}</a>
+	</div>
+
+	{{#if post.tags}}
+		<div class="tags">
+			Tagged: {{#each post.tags}}
+				<a href="">{{this.name}}</a>{{#unless @last}}, {{/unless}}
+			{{/each}}
+		</div>
+	{{/if}}
+
+	<div class="contents">
+		{{{post.content}}}
+	</div>
 </div>

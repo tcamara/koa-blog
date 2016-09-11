@@ -49,14 +49,7 @@ www.show = function*() {
 	if(typeof post != 'undefined') {
 		yield this.render('posts/show', {
 			header: post.title,
-			id: post.id,
-			title: post.title,
-			slug: post.slug,
-			user: post.author,
-			timestamp: post.timestamp,
-			editTimestamp: post.editTimestamp,
-			content: post.content,
-			href: postRoutes.url('show', post.id, post.slug),
+			post,
 		});
 	}
 	else { // the requested post is not defined, display the not found page

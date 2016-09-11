@@ -19,7 +19,7 @@ const validSortColumns = {
 	'content': 0
 };
 
-Post.get = function*(id) {
+Post.getRaw = function*(id) {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
@@ -32,6 +32,45 @@ Post.get = function*(id) {
 	    }).catch((err) => {
 	    	throw new Error('Error in Post.get: ' + err.message);
 	    });
+}
+
+Post.get = function*(id) {
+	// Need the router to be able to use named routes for links
+	const postRoutes = require('./../apps/www/posts/routes.js');
+
+	// Retrieve the post we're looking for
+	const post = yield Post.getRaw(id);
+
+	// Get the author data for our post
+	post.author = yield User.get(post.authorId);
+
+	// Handle link
+	post.href = postRoutes.url('show', post.id, post.slug);
+
+	// Handle image
+	post.image = postImagePath + post.image;
+
+	// Get all the tag IDs that are associated with our post
+	const postTags = yield PostTag.listTagsByPost([id]);
+
+	if(postTags.length) {
+		// Grab all the tag IDs
+		const tagIds = [];
+		for(let tag of postTags) {
+			tagIds.push(tag.tagId);
+		}
+
+		// Get the tag data for all tags associated with our posts
+		const tagList = yield Tag._list(tagIds);
+
+		// Handle tags
+		post.tags = [];
+		for(let tag of tagList) {
+			post.tags.push(tag);
+		}
+	}
+
+	return post;
 }
 
 // This does no formatting of the post data, and is therefore faster, but should really
