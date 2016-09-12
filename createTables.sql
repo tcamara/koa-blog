@@ -12,12 +12,12 @@ CREATE TABLE `Post` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `Post_Tag`;
+DROP TABLE IF EXISTS `PostTag`;
 
-CREATE TABLE `Post_Tag` (
+CREATE TABLE `PostTag` (
   `postId` int(11) NOT NULL,
   `tagId` int(11) NOT NULL,
-  PRIMARY KEY (`post_id`,`tag_id`)
+  PRIMARY KEY (`postId`,`tagId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `Tag`;
@@ -42,7 +42,7 @@ CREATE TABLE `User` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `Settings`;
+DROP TABLE IF EXISTS `Setting`;
 
 CREATE TABLE `Setting` (
   `key` varchar(100) NOT NULL,

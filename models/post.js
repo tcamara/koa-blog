@@ -19,7 +19,7 @@ const validSortColumns = {
 	'content': 0
 };
 
-Post.getRaw = function*(id) {
+Post.getOne = function*(id) {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
@@ -30,52 +30,37 @@ Post.getRaw = function*(id) {
 	    }).then((result) => {
 	        return result[0][0];
 	    }).catch((err) => {
-	    	throw new Error('Error in Post.get: ' + err.message);
+	    	throw new Error('Error in Post.getOne: ' + err.message);
 	    });
 }
 
-Post.get = function*(id) {
-	// Need the router to be able to use named routes for links
-	const postRoutes = require('./../apps/www/posts/routes.js');
-
+Post.getOneFormatted = function*(id) {
 	// Retrieve the post we're looking for
-	const post = yield Post.getRaw(id);
+	const post = yield Post.getOne(id);
 
-	// Get the author data for our post
-	post.author = yield User.get(post.authorId);
-
-	// Handle link
-	post.href = postRoutes.url('show', post.id, post.slug);
-
-	// Handle image
-	post.image = postImagePath + post.image;
-
-	// Get all the tag IDs that are associated with our post
-	const postTags = yield PostTag.listTagsByPost([id]);
-
-	if(postTags.length) {
-		// Grab all the tag IDs
-		const tagIds = [];
-		for(let tag of postTags) {
-			tagIds.push(tag.tagId);
-		}
-
-		// Get the tag data for all tags associated with our posts
-		const tagList = yield Tag._list(tagIds);
-
-		// Handle tags
-		post.tags = [];
-		for(let tag of tagList) {
-			post.tags.push(tag);
-		}
-	}
-
-	return post;
+	// Format it
+	const formattedPost = yield formatPost(post);
+	
+	return formattedPost;
 }
 
-// This does no formatting of the post data, and is therefore faster, but should really
-// only be used as a base function to assist with the main list function
-Post.listRaw = function*(page = 0, sort = '-id', searchTerm) {
+// Imposes no 'pagination' limits, for internal use only
+Post._getLimitless = function*(postIds) {
+	const queryString = 'SELECT * FROM `Post` WHERE `id` IN (' + postIds.join() + ')';
+	
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString, [postsPerPage, offset]);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
+	    }).catch((err) => {
+	        throw new Error('Error in Post._getLimitless: ' + err.message);
+	    });
+}
+
+Post.get = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * postsPerPage;
 	const orderString = parseSortParam(sort);
 	const queryString = 'SELECT * FROM `Post` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
@@ -88,30 +73,88 @@ Post.listRaw = function*(page = 0, sort = '-id', searchTerm) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	        throw new Error('Error in Post.list: ' + err.message);
+	        throw new Error('Error in Post.get: ' + err.message);
 	    });
 }
 
-Post.list = function*(page = 0, sort = '-id', searchTerm) {
+Post.getFormatted = function*(page = 0, sort = '-id', searchTerm) {
+	// Retrieve the list of posts we're looking for
+	const postList = yield Post.get(page, sort, searchTerm);
+
+	return yield Post.formatPosts(postList);
+}
+
+// Wrapper for a single-post version of formatPosts
+function* formatPost(post) {
+	const formattedPosts = yield formatPosts([post]);
+
+	return formattedPosts[0];
+}
+
+// Take a post object straight from the DB and transform it into a 
+function* formatPosts(posts) {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./../apps/www/posts/routes.js');
 
-	// Retrieve the list of posts we're looking for
-	const postList = yield Post.listRaw(page, sort, searchTerm);
+	// Get all the user data for users that are associated with our posts
+	const users = yield getUsers(posts);
 
-	// Grab all the post and author IDs
-	const postIds = [];
+	// Get all the tag data for tags that are associated with our posts
+	const tags = yield getTags(posts);
+
+	// Do the actual formatting
+	for(let post of posts) {
+		// Handle links
+		post.href = postRoutes.url('show', post.id, post.slug);
+
+		// Handle images
+		post.image = postImagePath + post.image;
+
+		// Handle author
+		post.author = users[post.authorId];
+
+		// Handle tags
+		post.tags = tags[post.id];
+	}
+
+	return posts;
+}
+
+// TODO: move this into the user model?
+function* getUsers(posts) {
+	// Need the router to be able to use named routes for links
+	const userRoutes = require('./../apps/www/users/routes.js');
+
 	const authorIds = {};
-	for(let post of postList) {
-		postIds.push(post.id);
+	for(let post of posts) {
 		authorIds[post.authorId] = 1;
 	}
 
 	// Get the author data for our posts
-	const userList = yield User._list(Object.keys(authorIds));
+	const users = yield User._getLimitless(Object.keys(authorIds));
+
+	// Assign user to authorId in hash
+	for(let user of users) {
+		user.link = userRoutes.url('show', user.id);
+		authorIds[user.id] = user;
+	}
+
+	return authorIds;
+}
+
+// TODO: move this into the tag model?
+function* getTags(posts) {
+	// Need the router to be able to use named routes for links
+	const tagRoutes = require('./../apps/www/tags/routes.js');
+
+	// Grab all the unique post IDs
+	const postIds = {};
+	for(let post of posts) {
+		postIds[post.id] = [];
+	}
 
 	// Get all the tag IDs that are associated with our posts
-	const postTags = yield PostTag.listTagsByPost(postIds);
+	const postTags = yield PostTag.getByPosts(Object.keys(postIds));
 
 	// Grab all the tag IDs
 	const tagIds = {};
@@ -119,48 +162,29 @@ Post.list = function*(page = 0, sort = '-id', searchTerm) {
 		tagIds[tag.tagId] = 1;
 	}
 
+	// Return nothing if these posts have no tags
+	if(Object.keys(tagIds).length == 0) {
+		return {};
+	}
+
 	// Get the tag data for all tags associated with our posts
-	const tagList = yield Tag._list(Object.keys(tagIds));
+	const tagList = yield Tag._getLimitless(Object.keys(tagIds));
 
-	// TODO: this is a really naive approach, improve it
-	for(let post of postList) {
-		// Handle links
-		post.href = postRoutes.url('show', post.id, post.slug);
+	// Assign tag to tagId in hash
+	for(let tag of tagList) {
+		tag.link = tagRoutes.url('show', tag.id, tag.slug);
+		tagIds[tag.id] = tag;
+	}
 
-		// Handle images
-		post.image = postImagePath + post.image;
-
-		// Handle tags
-		post.tags = [];
+	for(let postId in postIds) {
 		for(let postTag of postTags) {
-			if(postTag.postId === post.id) {
-				for(let tag of tagList) {
-					if(tag.id === postTag.tagId) {
-						post.tags.push(tag);
-					}
-				}
-			}
-		}
-
-		// Handle author
-		for(let user of userList) {
-			if(user.id === post.authorId) {
-				post.author = user;
+			if(postTag.postId == postId) {
+				postIds[postId].push(tagIds[postTag.tagId]);
 			}
 		}
 	}
 
-	return postList;
-}
-
-function* getTagsForPosts(postList) {
-	const postIds = [];
-	for(let post of postList) {
-		postIds.push(post.id);
-	}
-
-	const test = PostTag.listTagsByPost(postIds);
-	return test;
+	return postIds;
 }
 
 Post.create = function*(title, authorId, content, image) {

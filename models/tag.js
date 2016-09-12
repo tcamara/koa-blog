@@ -8,7 +8,7 @@ const validSortColumns = {
 	'numPosts': 1
 };
 
-Tag.get = function*(id) {
+Tag.getOne = function*(id) {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
@@ -19,12 +19,12 @@ Tag.get = function*(id) {
 	    }).then((result) => {
 	        return result[0][0];
 	    }).catch((err) => {
-	    	throw new Error('Error in Tag.get: ' + err.message);
+	    	throw new Error('Error in Tag.getOne: ' + err.message);
 	    });
 }
 
-// Should only be used internally
-Tag._list = function*(tagIds) {
+// Imposes no 'pagination' limits, for internal use only
+Tag._getLimitless = function*(tagIds) {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
 	
 	return yield global.connectionPool.getConnection()
@@ -35,11 +35,11 @@ Tag._list = function*(tagIds) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	        throw new Error('Error in Tag._list: ' + err.message);
+	        throw new Error('Error in Tag._getLimitless: ' + err.message);
 	    });
 }
 
-Tag.list = function*(page = 0, sort = '-id', searchTerm) {
+Tag.get = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * tagsPerPage;
 	const orderString = parseSortParam(sort);
 	const queryString = 'SELECT * FROM `Tag` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
@@ -52,7 +52,7 @@ Tag.list = function*(page = 0, sort = '-id', searchTerm) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	        throw new Error('Error in Tag.list: ' + err.message);
+	        throw new Error('Error in Tag.get: ' + err.message);
 	    });
 }
 

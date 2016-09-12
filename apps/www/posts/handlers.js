@@ -6,7 +6,7 @@ const PostTag = require('./../../../models/postTag.js');
 
 www.index = function*() {
 	const query = this.request.query;
-	const posts = yield Post.list(query.page, query.sort, query.q);
+	const posts = yield Post.getFormatted(query.page, query.sort, query.q);
 
 	yield this.render('posts/list', {
 		title: 'Posts',
@@ -44,7 +44,7 @@ www.show = function*() {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
-	const post = yield Post.get(this.params.postId);
+	const post = yield Post.getOneFormatted(this.params.postId);
 
 	if(typeof post != 'undefined') {
 		yield this.render('posts/show', {

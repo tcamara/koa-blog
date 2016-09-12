@@ -2,18 +2,18 @@
 	<h1>{{post.title}}</h1>
 
 	<div class="byline">
-		By <a href="">{{post.author.name}}</a>
+		Posted by <a href="{{post.author.link}}">{{post.author.name}}</a> {{beautifyDate post.timestamp}}
 	</div>
-
-	{{#if post.tags}}
-		<div class="tags">
-			Tagged: {{#each post.tags}}
-				<a href="">{{this.name}}</a>{{#unless @last}}, {{/unless}}
-			{{/each}}
-		</div>
-	{{/if}}
 
 	<div class="contents">
 		{{{post.content}}}
 	</div>
+
+	{{#if post.tags}}
+		<div class="tags">
+			{{#each post.tags}}
+				<a href="{{this.link}}">{{this.name}}</a>
+			{{/each}}
+		</div>
+	{{/if}}
 </div>

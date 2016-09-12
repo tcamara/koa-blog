@@ -1,9 +1,8 @@
-
 INSERT INTO `Post` (`id`, `title`, `slug`, `authorId`, `timestamp`, `content`, `image`) VALUES
 (1,	'Test Post',	'test-post',	1,	'2016-01-12 14:22:41',	'Test post contents',	'0'),
 (2,	'New Test Post',	'new-test-post',	1,	'2016-09-05 15:38:07',	'This is some content!',	'0');
 
-INSERT INTO `Post_Tag` (`postId`, `tagId`) VALUES
+INSERT INTO `PostTag` (`postId`, `tagId`) VALUES
 (1,	1),
 (1,	2),
 (2,	1);

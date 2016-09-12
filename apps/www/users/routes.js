@@ -8,21 +8,21 @@ const postRouter = new Router();
 const www = require('./handlers.js');
 
 // Show post list
-postRouter.get('/', www.index);
+postRouter.get('index', '/', www.index);
 
 // Show create post page
-postRouter.get('/new', www.new);
+postRouter.get('new', '/new', www.new);
 
 // Create post submission
-postRouter.post('/create', koaBody, www.create);
+postRouter.post('create', '/create', koaBody, www.create);
 
 // Show single post
-postRouter.get('/:id', www.show);
+postRouter.get('show', '/:id', www.show);
 
 // Update post submission
-postRouter.post('/:id/update', koaBody, www.update);
+postRouter.post('update', '/:id/update', koaBody, www.update);
 
 // Delete post submission
-postRouter.post('/:id/delete', www.delete);
+postRouter.post('delete', '/:id/delete', www.delete);
 
 module.exports = postRouter;

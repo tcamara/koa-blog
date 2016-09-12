@@ -7,7 +7,7 @@ const validSortColumns = {
 };
 
 PostTag.exists = function*(postId, tagId) {
-	const queryString = 'SELECT * FROM `Post_Tag` WHERE `postId` = ? && tagId = ?';
+	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? && tagId = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -21,9 +21,9 @@ PostTag.exists = function*(postId, tagId) {
 	    });
 }
 
-PostTag.listByPost = function*(postId, page = 0) {
+PostTag.getByPost = function*(postId, page = 0) {
 	const offset = page * postsPerPage;
-	const queryString = 'SELECT * FROM `Post_Tag` WHERE `postId` = ? LIMIT ? OFFSET ?';
+	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? LIMIT ? OFFSET ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -33,13 +33,13 @@ PostTag.listByPost = function*(postId, page = 0) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.listByPost: ' + err.message);
+	    	throw new Error('Error in PostTag.getByPost: ' + err.message);
 	    });
 }
 
-PostTag.listByTag = function*(tagId, page = 0) {
+PostTag.getByTag = function*(tagId, page = 0) {
 	const offset = page * postsPerPage;
-	const queryString = 'SELECT * FROM `Post_Tag` WHERE `tadId` = ? LIMIT ? OFFSET ?';
+	const queryString = 'SELECT * FROM `PostTag` WHERE `tadId` = ? LIMIT ? OFFSET ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -49,12 +49,12 @@ PostTag.listByTag = function*(tagId, page = 0) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.listByTag: ' + err.message);
+	    	throw new Error('Error in PostTag.getByTag: ' + err.message);
 	    });
 }
 
-PostTag.listTagsByPost = function*(postIds) {
-	const queryString = 'SELECT * FROM `Post_Tag` WHERE `postId` IN (' + postIds.join() + ')';
+PostTag.getByPosts = function*(postIds) {
+	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` IN (' + postIds.join() + ')';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -64,12 +64,27 @@ PostTag.listTagsByPost = function*(postIds) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.listTagsByPost: ' + err.message);
+	    	throw new Error('Error in PostTag.getByPosts: ' + err.message);
+	    });
+}
+
+PostTag.getByTags = function*(tagIds) {
+	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` IN (' + tagIds.join() + ')';
+
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
+	    }).catch((err) => {
+	    	throw new Error('Error in PostTag.getByTags: ' + err.message);
 	    });
 }
 
 PostTag.create = function*(postId, tagId) {
-	const queryString = 'INSERT INTO `Post_Tag` (`postId`, `tadId`) VALUES (?, ?)';
+	const queryString = 'INSERT INTO `PostTag` (`postId`, `tadId`) VALUES (?, ?)';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -79,12 +94,12 @@ PostTag.create = function*(postId, tagId) {
 	    }).then((result) => {
 		    return result[0].insertId;
 	    }).catch((err) => {
-	        throw new Error('Error in Post.create: ' + err.message);
+	        throw new Error('Error in PostTag.create: ' + err.message);
 	    });
 }
 
 PostTag.delete = function*(postId, tagId) {
-	const queryString = 'DELETE FROM `Post_Tag` WHERE `postId` = ? && `tadId` = ?';
+	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ? && `tadId` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -97,7 +112,7 @@ PostTag.delete = function*(postId, tagId) {
 }
 
 PostTag.deleteByPost = function*(postId) {
-	const queryString = 'DELETE FROM `Post_Tag` WHERE `postId` = ?';
+	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
@@ -110,7 +125,7 @@ PostTag.deleteByPost = function*(postId) {
 }
 
 PostTag.deleteByTag = function*(tagId) {
-	const queryString = 'DELETE FROM `Post_Tag` WHERE `tadId` = ?';
+	const queryString = 'DELETE FROM `PostTag` WHERE `tadId` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {

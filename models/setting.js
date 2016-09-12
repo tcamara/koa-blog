@@ -1,7 +1,7 @@
 const Setting = module.exports = {};
 
 
-Setting.get = function*(key) {
+Setting.getOne = function*(key) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` = ?';
 
 	return yield global.connectionPool.getConnection()
@@ -11,6 +11,21 @@ Setting.get = function*(key) {
 	        return queryResult;
 	    }).then((result) => {
 	        return result[0][0];
+	    }).catch((err) => {
+	    	throw new Error('Error in Setting.getOne: ' + err.message);
+	    });
+}
+
+Setting.get = function*(keys) {
+	const queryString = 'SELECT * FROM `Setting` WHERE `key` IN (' + keys.join() + ')';
+
+	return yield global.connectionPool.getConnection()
+	    .then((connection) => {
+	        const queryResult = connection.query(queryString);
+	        connection.release();
+	        return queryResult;
+	    }).then((result) => {
+	        return result[0];
 	    }).catch((err) => {
 	    	throw new Error('Error in Setting.get: ' + err.message);
 	    });

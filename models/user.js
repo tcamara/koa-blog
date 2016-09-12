@@ -9,7 +9,7 @@ const validSortColumns = {
 	'bio': 0
 };
 
-User.get = function*(id) {
+User.getOne = function*(id) {
 	const queryString = 'SELECT * FROM `User` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
@@ -20,12 +20,12 @@ User.get = function*(id) {
 	    }).then((result) => {
 	        return result[0][0];
 	    }).catch((err) => {
-	    	throw new Error('Error in User.get: ' + err.message);
+	    	throw new Error('Error in User.getOne: ' + err.message);
 	    });
 }
 
-// Should only be used internally
-User._list = function*(userIds) {
+// Imposes no 'pagination' limits, for internal use only
+User._getLimitless = function*(userIds) {
 	const queryString = 'SELECT * FROM `User` WHERE `id` IN (' + userIds.join() + ')';
 	
 	return yield global.connectionPool.getConnection()
@@ -36,11 +36,11 @@ User._list = function*(userIds) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	        throw new Error('Error in User._list: ' + err.message);
+	        throw new Error('Error in User._getLimitless: ' + err.message);
 	    });
 }
 
-User.list = function*(page = 0, sort = '-id', searchTerm) {
+User.get = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * usersPerPage;
 	const orderString = parseSortParam(sort);
 	const queryString = 'SELECT * FROM `User` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
@@ -53,7 +53,7 @@ User.list = function*(page = 0, sort = '-id', searchTerm) {
 	    }).then((result) => {
 	        return result[0];
 	    }).catch((err) => {
-	        throw new Error('Error in User.list: ' + err.message);
+	        throw new Error('Error in User.get: ' + err.message);
 	    });
 }
 
