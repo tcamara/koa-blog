@@ -5,18 +5,22 @@ const path = require('path');
 const PostTag = require('./postTag.js');
 const Tag = require('./tag.js');
 const User = require('./user.js');
+const mysql = require('./../mysql.js');
 
 const postImagePath = '/images/posts/';
 const fullPostImagePath = path.join(global.webRoot, postImagePath);
-const postsPerPage = 5;
-const validSortColumns = {
-	'id': 1,
-	'title': 1,
-	'slug': 1,
-	'authorId': 1,
-	'timestamp': 1,
-	'editTimestamp': 1,
-	'content': 0
+const db = {
+	'table': 'Post',
+	'pageSize': 5,
+	'columns': {
+		'id': { 'sortable': 1, 'filterable': 1 },
+		'title': { 'sortable': 1, 'filterable': 1 },
+		'slug': { 'sortable': 1, 'filterable': 1 },
+		'authorId': { 'sortable': 1, 'filterable': 1 },
+		'timestamp': { 'sortable': 1, 'filterable': 1 },
+		'editTimestamp': { 'sortable': 1, 'filterable': 1 },
+		'content': { 'sortable': 0, 'filterable': 1 },
+	}
 };
 
 Post.getOne = function*(id) {
@@ -39,9 +43,12 @@ Post.getOneFormatted = function*(id) {
 	const post = yield Post.getOne(id);
 
 	// Format it
-	const formattedPost = yield formatPost(post);
-	
-	return formattedPost;
+	if(post) {
+		return yield formatPost(post);
+	}
+	else {
+		return null;
+	}
 }
 
 // Imposes no 'pagination' limits, for internal use only
@@ -50,7 +57,7 @@ Post._getLimitless = function*(postIds) {
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postsPerPage, offset]);
+	        const queryResult = connection.query(queryString, [db.pageSize, offset]);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -60,14 +67,20 @@ Post._getLimitless = function*(postIds) {
 	    });
 }
 
-Post.get = function*(page = 0, sort = '-id', searchTerm) {
-	const offset = page * postsPerPage;
-	const orderString = parseSortParam(sort);
-	const queryString = 'SELECT * FROM `Post` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
-	
+Post.get = function*(params) {
+	const options = {
+		page: params.page || 0,
+		sort: params.sort || '-id', 
+		filter: params.filter || null,
+		query: params.query || null,
+		fields: params.fields || null,
+	};
+
+	const queryString = mysql.buildSelectQueryString(db, options);
+
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postsPerPage, offset]);
+	        const queryResult = connection.query(queryString);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -77,11 +90,17 @@ Post.get = function*(page = 0, sort = '-id', searchTerm) {
 	    });
 }
 
-Post.getFormatted = function*(page = 0, sort = '-id', searchTerm) {
+// Calls Post.get, but also formats the results for display
+Post.getFormatted = function*(params) {
 	// Retrieve the list of posts we're looking for
-	const postList = yield Post.get(page, sort, searchTerm);
+	const unformattedPosts = yield Post.get(params);
 
-	return yield Post.formatPosts(postList);
+	if(unformattedPosts.length) {
+		return yield formatPosts(unformattedPosts);
+	}
+	else {
+		return [];
+	}
 }
 
 // Wrapper for a single-post version of formatPosts
@@ -248,29 +267,4 @@ Post.delete = function*(id) {
 
 function slugify(title) {
 	return title.replace(/ /g, '-').toLowerCase();
-}
-
-function parseSortParam(queryStringChunk) {
-	const items = queryStringChunk.split(',');
-	const orderBy = [];
-
-	for(let item of items) {
-		let direction = '';
-
-		// Starting with a '-' indicates a DESC order for this field
-		if(item.charAt(0) === '-') {
-			direction = ' DESC'
-			item = item.substr(1); // Strip '-' character
-		}
-
-		// Ensure that only columns we want to be sortable are accepted
-		if(validSortColumns[item]) {
-			orderBy.push('`' + item + '`' + direction); 
-		}
-		else {
-			throw new Error('Error in parseSortParam: Invalid column for sorting');
-		}
-	}
-
-	return orderBy.join(', ');
 }

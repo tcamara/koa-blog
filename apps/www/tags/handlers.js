@@ -7,7 +7,7 @@ www.index = function*() {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./routes.js');
 
-	const tagResults = yield Tag.list(
+	const tagResults = yield Tag.get(
 		this.request.query.page, 
 		this.request.query.sort, 
 		this.request.query.q
@@ -57,7 +57,7 @@ www.show = function*() {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./routes.js');
 
-	const tag = yield Tag.get(this.params.tagId);
+	const tag = yield Tag.getOne(this.params.tagId);
 
 	if(typeof tag != 'undefined') {
 		yield this.render('tags/show', {

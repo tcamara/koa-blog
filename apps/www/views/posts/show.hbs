@@ -1,3 +1,4 @@
+{{#if post}}
 <div class="post inner">
 	<h1>{{post.title}}</h1>
 
@@ -17,3 +18,6 @@
 		</div>
 	{{/if}}
 </div>
+{{else}}
+	Sorry, this post was not found
+{{/if}}

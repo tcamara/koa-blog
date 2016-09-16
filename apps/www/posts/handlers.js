@@ -2,15 +2,18 @@ const www = module.exports = {};
 
 // Set up post model
 const Post = require('./../../../models/post.js');
-const PostTag = require('./../../../models/postTag.js');
 
 www.index = function*() {
 	const query = this.request.query;
-	const posts = yield Post.getFormatted(query.page, query.sort, query.q);
+	const posts = yield Post.getFormatted({
+		page: query.page, 
+		sort: query.sort, 
+		query: query.q,
+		fields: query.fields,
+	});
 
 	yield this.render('posts/list', {
 		title: 'Posts',
-		header: 'Posts',
 		posts,
 	});
 };
@@ -21,7 +24,6 @@ www.new = function*() {
 
 	yield this.render('posts/new', {
 		title: 'New Post',
-		header: 'New Post',
 		action: postRoutes.url('create'),
 		hasEditor: true,
 	});
@@ -35,28 +37,23 @@ www.create = function*() {
 
 	// TODO: base this on current user
 	const author = 1;
-	const newPostId = yield Post.create(params.fields.title, author, params.fields.content, params.files.image);
+	const newPostId = yield Post.create(
+		params.fields.title, 
+		author, 
+		params.fields.content, 
+		params.files.image
+	);
 
 	this.redirect(postRoutes.url('show', newPostId));
 };
 
 www.show = function*() {
-	// Need the router to be able to use named routes for links
-	const postRoutes = require('./routes.js');
-
 	const post = yield Post.getOneFormatted(this.params.postId);
 
-	if(typeof post != 'undefined') {
-		yield this.render('posts/show', {
-			header: post.title,
-			post,
-		});
-	}
-	else { // the requested post is not defined, display the not found page
-		yield this.render('posts/notFound', {
-			header: 'Post Not Found',
-		});
-	}
+	yield this.render('posts/show', {
+		title: post ? post.title : 'Post Not Found',
+		post,
+	});
 };
 
 www.update = function*() {
