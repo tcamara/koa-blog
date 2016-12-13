@@ -39,6 +39,7 @@ Tag._getLimitless = function*(tagIds) {
 	    });
 }
 
+// TODO: refactor this the same way that post.js has been done
 Tag.get = function*(page = 0, sort = '-id', searchTerm) {
 	const offset = page * tagsPerPage;
 	const orderString = parseSortParam(sort);

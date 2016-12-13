@@ -1,9 +1,9 @@
-const www = module.exports = {};
+const tagHandler = module.exports = {};
 
 // Set up tag model
 const Tag = require('./../../../models/tag.js');
 
-www.index = function*() {
+tagHandler.index = function*() {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./routes.js');
 
@@ -33,7 +33,7 @@ www.index = function*() {
 	});
 };
 
-www.new = function*() {
+tagHandler.new = function*() {
 	// Need the router to be able to use named routes for the form action
 	const tagRoutes = require('./routes.js');
 
@@ -44,7 +44,7 @@ www.new = function*() {
 	});
 };
 
-www.create = function*() {
+tagHandler.create = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const tagRoutes = require('./routes.js');
 
@@ -53,7 +53,7 @@ www.create = function*() {
 	this.redirect(tagRoutes.url('show', newTagId));
 };
 
-www.show = function*() {
+tagHandler.show = function*() {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./routes.js');
 
@@ -79,7 +79,7 @@ www.show = function*() {
 	}
 };
 
-www.update = function*() {
+tagHandler.update = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const tagRoutes = require('./routes.js');
 
@@ -88,7 +88,7 @@ www.update = function*() {
 	this.redirect(tagRoutes.url('show', this.params.tagId));
 };
 
-www.delete = function*() {
+tagHandler.delete = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const tagRoutes = require('./routes.js');
 
@@ -98,16 +98,16 @@ www.delete = function*() {
 };
 
 // TODO: index, but only within the given tag
-www.tag = function*() {
+tagHandler.tag = function*() {
 	
 };
 
 // TODO: add a tag to a post
-www.addTag = function*() {
+tagHandler.addTag = function*() {
 	
 };
 
 // TODO: remove a tag from a post
-www.removeTag = function*() {
+tagHandler.removeTag = function*() {
 	
 };

@@ -59,11 +59,23 @@ function handleFields(db, options) {
 	return fields;
 }
 
+// TODO: split filter and query
+// TODO: handle filtering/querying with operators other than "="
 function handleWhere(db, options) {
 	let where = '';
 	
 	if(options.filter || options.query) {
+		where += 'WHERE ';
+		let iteration = 0;
+		let number_of_filters = Object.keys(options.filter).length;
 
+		for(var filter in options.filter) {
+			where += "`" + filter + "` = '" + options.filter[filter] + "' ";
+			if(number_of_filters > 1 && iteration < number_of_filters - 1) {
+				where += "AND ";
+			}
+			iteration++;
+		}
 	}
 
 	return where;

@@ -2,9 +2,9 @@ const Router = require('koa-router');
 
 const generalRouter = new Router();
 
-const www = require('./handlers.js');
+const generalHandler = require('./handlers.js');
 
 // Show home page
-generalRouter.get('index', '/', www.index);
+generalRouter.get('index', '/', generalHandler.index);
 
 module.exports = generalRouter;

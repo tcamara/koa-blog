@@ -1,9 +1,9 @@
-const www = module.exports = {};
+const postHandler = module.exports = {};
 
 // Set up post model
 const Post = require('./../../../models/post.js');
 
-www.index = function*() {
+postHandler.index = function*() {
 	const query = this.request.query;
 	const posts = yield Post.getFormatted({
 		page: query.page, 
@@ -18,7 +18,7 @@ www.index = function*() {
 	});
 };
 
-www.new = function*() {
+postHandler.new = function*() {
 	// Need the router to be able to use named routes for the form action
 	const postRoutes = require('./routes.js');
 
@@ -29,7 +29,7 @@ www.new = function*() {
 	});
 };
 
-www.create = function*() {
+postHandler.create = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
@@ -47,7 +47,7 @@ www.create = function*() {
 	this.redirect(postRoutes.url('show', newPostId));
 };
 
-www.show = function*() {
+postHandler.show = function*() {
 	const post = yield Post.getOneFormatted(this.params.postId);
 
 	yield this.render('posts/show', {
@@ -56,7 +56,7 @@ www.show = function*() {
 	});
 };
 
-www.update = function*() {
+postHandler.update = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
@@ -70,7 +70,7 @@ www.update = function*() {
 	this.redirect(postRoutes.url('show', this.params.postId));
 };
 
-www.delete = function*() {
+postHandler.delete = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
@@ -79,17 +79,31 @@ www.delete = function*() {
 	this.redirect(postRoutes.url('index'));
 };
 
-// TODO: index, but only within the given tag
-www.tag = function*() {
-	
+// TODO: query the tag first, then the associated posts
+postHandler.tag = function*() {
+	const query = this.request.query;
+	const posts = yield Post.getFormatted({
+		page: query.page, 
+		sort: query.sort, 
+		filter: {
+			'tagId': this.params.tagId,
+			'slug': this.params.slug
+		},
+		fields: query.fields,
+	});
+
+	yield this.render('posts/list', {
+		title: 'Posts Tagged ',
+		posts,
+	});
 };
 
 // TODO: add a tag to a post
-www.addTag = function*() {
+postHandler.addTag = function*() {
 	
 };
 
 // TODO: remove a tag from a post
-www.removeTag = function*() {
+postHandler.removeTag = function*() {
 	
 };

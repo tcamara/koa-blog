@@ -226,6 +226,11 @@ Post.create = function*(title, authorId, content, image) {
 }
 
 function* moveImage(image) {
+	// If there is no image, just return
+	if(image.size === 0) {
+		return;
+	}
+
 	const source = fs.createReadStream(image.path);
 	const destination = fs.createWriteStream(path.join(fullPostImagePath, image.name));
 

@@ -1,6 +1,6 @@
-const www = module.exports = {};
+const generalHandler = module.exports = {};
 
-www.index = function*() {
+generalHandler.index = function*() {
 	yield this.render('general/index', {
 		title: 'Index',
 		content: 'Index content',

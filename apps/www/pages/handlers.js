@@ -1,9 +1,9 @@
-const www = module.exports = {};
+const pageHandler = module.exports = {};
 
 // Set up post model
 const Post = require('./../../../models/post.js');
 
-www.index = function*() {
+pageHandler.index = function*() {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
@@ -36,7 +36,7 @@ www.index = function*() {
 	});
 };
 
-www.new = function*() {
+pageHandler.new = function*() {
 	// Need the router to be able to use named routes for the form action
 	const postRoutes = require('./routes.js');
 
@@ -48,7 +48,7 @@ www.new = function*() {
 	});
 };
 
-www.create = function*() {
+pageHandler.create = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
@@ -61,7 +61,7 @@ www.create = function*() {
 	this.redirect(postRoutes.url('show', newPostId));
 };
 
-www.show = function*() {
+pageHandler.show = function*() {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
@@ -87,7 +87,7 @@ www.show = function*() {
 	}
 };
 
-www.update = function*() {
+pageHandler.update = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
@@ -101,7 +101,7 @@ www.update = function*() {
 	this.redirect(postRoutes.url('show', this.params.id));
 };
 
-www.delete = function*() {
+pageHandler.delete = function*() {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 

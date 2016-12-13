@@ -1,25 +1,25 @@
 const Router = require('koa-router');
 
-const postRouter = new Router();
+const pageRouter = new Router();
 
-const www = require('./handlers.js');
+const pageHandler = require('./handlers.js');
 
-// Show post list
-postRouter.get('index', '/', www.index);
+// Show page list
+pageRouter.get('index', '/', pageHandler.index);
 
-// Show create post page
-postRouter.get('new', '/new', www.new);
+// Show create page page
+pageRouter.get('new', '/new', pageHandler.new);
 
-// Create post submission
-postRouter.post('create', '/create', www.create);
+// Create page submission
+pageRouter.post('create', '/', pageHandler.create);
 
-// Show single post
-postRouter.get('show', '/:id/:slug?', www.show);
+// Show single page
+pageRouter.get('show', '/:pageId', pageHandler.show);
 
-// Update post submission
-postRouter.post('update', '/:id/update', www.update);
+// Update page submission
+pageRouter.post('update', '/:pageId', pageHandler.update);
 
-// Delete post submission
-postRouter.post('delete', '/:id/delete', www.delete);
+// Delete page submission
+pageRouter.delete('delete', '/:pageId', pageHandler.delete);
 
-module.exports = postRouter;
+module.exports = pageRouter;

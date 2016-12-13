@@ -5,33 +5,33 @@ const koaBody = require('koa-body')({
 
 const postRouter = new Router();
 
-const www = require('./handlers.js');
+const postHandler = require('./handlers.js');
 
 // Show post list
-postRouter.get('index', '/', www.index);
+postRouter.get('index', '/', postHandler.index);
 
 // Show create post page
-postRouter.get('new', '/new', www.new);
+postRouter.get('new', '/new', postHandler.new);
 
 // Create post submission
-postRouter.post('create', '/', koaBody, www.create);
-
-// Show single post
-postRouter.get('show', '/:postId/:slug?', www.show);
-
-// Update post submission
-postRouter.post('update', '/:postId', koaBody, www.update);
-
-// Delete post submission
-postRouter.delete('delete', '/:postId', www.delete);
+postRouter.post('create', '/', koaBody, postHandler.create);
 
 // Get posts by tag
-postRouter.get('tag', '/tags/:tagId', www.tag);
+postRouter.get('tag', '/tags/:tagId', postHandler.tag);
 
 // Add tag to post
-postRouter.post('addTag', '/:postId/tags/:tagId', www.addTag);
+postRouter.post('addTag', '/:postId/tags/:tagId', postHandler.addTag);
 
 // Remove tag from post
-postRouter.delete('removeTag', '/:postId/tags/:tagId', www.removeTag);
+postRouter.delete('removeTag', '/:postId/tags/:tagId', postHandler.removeTag);
+
+// Show single post
+postRouter.get('show', '/:postId/:slug?', postHandler.show);
+
+// Update post submission
+postRouter.post('update', '/:postId', koaBody, postHandler.update);
+
+// Delete post submission
+postRouter.delete('delete', '/:postId', postHandler.delete);
 
 module.exports = postRouter;
