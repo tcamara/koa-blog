@@ -6,6 +6,7 @@ const PostTag = require('./postTag.js');
 const Tag = require('./tag.js');
 const User = require('./user.js');
 const mysql = require('./../mysql.js');
+const slugify = require('./../utils/slugify.js');
 
 const postImagePath = '/images/posts/';
 const fullPostImagePath = path.join(global.webRoot, postImagePath);
@@ -23,12 +24,12 @@ const db = {
 	}
 };
 
-Post.getOne = function*(id) {
+Post.getOne = function*(postId) {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, id);
+	        const queryResult = connection.query(queryString, postId);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -38,11 +39,9 @@ Post.getOne = function*(id) {
 	    });
 }
 
-Post.getOneFormatted = function*(id) {
-	// Retrieve the post we're looking for
-	const post = yield Post.getOne(id);
+Post.getOneFormatted = function*(postId) {
+	const post = yield Post.getOne(postId);
 
-	// Format it
 	if(post) {
 		return yield formatPost(post);
 	}
@@ -57,7 +56,7 @@ Post._getLimitless = function*(postIds) {
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [db.pageSize, offset]);
+	        const queryResult = connection.query(queryString);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -74,6 +73,7 @@ Post.get = function*(params) {
 		filter: params.filter || null,
 		query: params.query || null,
 		fields: params.fields || null,
+		customWhere: params.customWhere || null,
 	};
 
 	const queryString = mysql.buildSelectQueryString(db, options);
@@ -90,9 +90,7 @@ Post.get = function*(params) {
 	    });
 }
 
-// Calls Post.get, but also formats the results for display
 Post.getFormatted = function*(params) {
-	// Retrieve the list of posts we're looking for
 	const unformattedPosts = yield Post.get(params);
 
 	if(unformattedPosts.length) {
@@ -103,14 +101,13 @@ Post.getFormatted = function*(params) {
 	}
 }
 
-// Wrapper for a single-post version of formatPosts
 function* formatPost(post) {
 	const formattedPosts = yield formatPosts([post]);
 
 	return formattedPosts[0];
 }
 
-// Take a post object straight from the DB and transform it into a 
+// Take post objects straight from the DB and transform them into a view-ready format
 function* formatPosts(posts) {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./../apps/www/posts/routes.js');
@@ -243,13 +240,13 @@ function* moveImage(image) {
 	})
 }
 
-Post.update = function*(id, title, authorId, content) {
+Post.update = function*(postId, title, authorId, content) {
 	const slug = slugify(title);
 	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `editTimestamp` = now(), `content` = ? WHERE `id` = ?';
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [title, slug, authorId, content, id]);
+	        const queryResult = connection.query(queryString, [title, slug, authorId, content, postId]);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
@@ -257,19 +254,15 @@ Post.update = function*(id, title, authorId, content) {
 	    });
 }
 
-Post.delete = function*(id) {
+Post.delete = function*(postId) {
 	const queryString = 'DELETE FROM `Post` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, id);
+	        const queryResult = connection.query(queryString, postId);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
 	        throw new Error('Error in Post.delete: ' + err.message);
 	    });
-}
-
-function slugify(title) {
-	return title.replace(/ /g, '-').toLowerCase();
 }

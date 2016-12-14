@@ -36,7 +36,6 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 | GET /posts/:postId/[:slug]        | Guest       | show single post       |
 | POST /posts/:postId               | Member*     | update post submission |
 | DELETE /posts/:postId             | Member*     | delete post submission |
-| GET /posts/tags/:tagId            | Guest       | get posts by tag       |
 | POST /posts/:postId/tags/:tagId   | Member*     | add tag to post        |
 | DELETE /posts/:postId/tags/:tagId | Member*     | remove tag from post   |
 
@@ -58,12 +57,9 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 | GET /tags                         | Guest       | show tag list          |
 | GET /tags/new                     | Member      | show create tag page   |
 | POST /tags                        | Member      | create tag submission  |
-| GET /tags/:tagId/[:slug]          | Guest       | show single tag?       |
+| GET /tags/:tagId/[:slug]          | Guest       | get posts by tag       |
 | POST /tags/:tagId                 | Editor      | update tag submission  |
 | DELETE /tags/:tagId               | Editor      | delete tag submission  |
-| GET /tags/:tagId/posts            | Guest       | get posts by tag       |
-| POST /tags/:tagId/posts/:postId   | Member*     | add tag to post        |
-| DELETE /tags/:tagId/posts/:postId | Member*     | remove tag from post   |
 
 ### Pages
 

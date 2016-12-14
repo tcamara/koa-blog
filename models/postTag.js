@@ -22,12 +22,12 @@ PostTag.exists = function*(postId, tagId) {
 }
 
 PostTag.getByPost = function*(postId, page = 0) {
-	const offset = page * postsPerPage;
+	const offset = page * postTagsPerPage;
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? LIMIT ? OFFSET ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postId, postsPerPage, offset]);
+	        const queryResult = connection.query(queryString, [postId, postTagsPerPage, offset]);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -37,13 +37,25 @@ PostTag.getByPost = function*(postId, page = 0) {
 	    });
 }
 
-PostTag.getByTag = function*(tagId, page = 0) {
-	const offset = page * postsPerPage;
-	const queryString = 'SELECT * FROM `PostTag` WHERE `tadId` = ? LIMIT ? OFFSET ?';
+PostTag.getPostIdsByTag = function*(tagId, page = 0) {
+	const postTags = yield PostTag.getByTag(tagId, page);
+
+	const posts = [];
+
+	for(let postTag of postTags) {
+		posts.push(postTag.postId);
+	}
+
+	return posts;
+}
+
+PostTag.getByTag = function*(tagId, page) {
+	const offset = page * postTagsPerPage;
+	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` = ? LIMIT ? OFFSET ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [tagId, postsPerPage, offset]);
+	        const queryResult = connection.query(queryString, [tagId, postTagsPerPage, offset]);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {

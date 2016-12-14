@@ -12,22 +12,17 @@ const dev_config = {
 global.connectionPool = mysql.createPool(dev_config);
 
 export function buildSelectQueryString(db, options) {
-	// Handle fields, use * unless otherwise specified
 	const fields = handleFields(db, options);
 	
-	// Handle table
 	const table = '`' + db.table + '`';
 
-	// Handle where clause
 	const where = handleWhere(db, options);
 
-	// Handle order clause
 	const orderBy = handleOrderBy(db, options);
 
-	// Handle limit and offset
-	const limit = handleLimit(db, options);
+	const limitAndOffset = handleLimitAndOffset(db, options);
 	
-	const queryString = `SELECT ${fields} FROM ${table} ${where}${orderBy}${limit}`;
+	const queryString = `SELECT ${fields} FROM ${table} ${where}${orderBy}${limitAndOffset}`;
 
 	console.log(queryString);
 
@@ -63,25 +58,31 @@ function handleFields(db, options) {
 // TODO: handle filtering/querying with operators other than "="
 function handleWhere(db, options) {
 	let where = '';
-	
-	if(options.filter || options.query) {
-		where += 'WHERE ';
-		let iteration = 0;
-		let number_of_filters = Object.keys(options.filter).length;
 
-		for(var filter in options.filter) {
-			where += "`" + filter + "` = '" + options.filter[filter] + "' ";
-			if(number_of_filters > 1 && iteration < number_of_filters - 1) {
-				where += "AND ";
+	if(options.customWhere || options.filter) {
+		where += 'WHERE ';
+
+		if(options.customWhere) {
+			where += options.customWhere + ' ';
+		}
+		else if(options.filter) {
+			let iteration = 0;
+			let number_of_filters = Object.keys(options.filter).length;
+
+			for(var filter in options.filter) {
+				where += "`" + filter + "` = '" + options.filter[filter] + "' ";
+				if(number_of_filters > 1 && iteration < number_of_filters - 1) {
+					where += "AND ";
+				}
+				iteration++;
 			}
-			iteration++;
 		}
 	}
 
 	return where;
 }
 
-function handleLimit(db, options) {
+function handleLimitAndOffset(db, options) {
 	const offset = options.page * db.pageSize;
 
 	return `LIMIT ${db.pageSize} OFFSET ${offset}`;

@@ -16,9 +16,6 @@ postRouter.get('new', '/new', postHandler.new);
 // Create post submission
 postRouter.post('create', '/', koaBody, postHandler.create);
 
-// Get posts by tag
-postRouter.get('tag', '/tags/:tagId', postHandler.tag);
-
 // Add tag to post
 postRouter.post('addTag', '/:postId/tags/:tagId', postHandler.addTag);
 

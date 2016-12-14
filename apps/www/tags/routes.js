@@ -25,13 +25,4 @@ tagRouter.post('update', '/:tagId', koaBody, tagHandler.update);
 // Delete tag submission
 tagRouter.delete('delete', '/:tagId', tagHandler.delete);
 
-// Get posts by tag
-tagRouter.get('tag', '/:tagId/posts', tagHandler.tag);
-
-// Add tag to post
-tagRouter.post('addTag', '/:tagId/posts/:postId', tagHandler.addTag);
-
-// Remove tag from post
-tagRouter.delete('removeTag', '/:tagId/posts/:postId', tagHandler.removeTag);
-
 module.exports = tagRouter;

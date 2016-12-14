@@ -1,19 +1,24 @@
 const Tag = module.exports = {};
 
-const tagsPerPage = 5;
-const validSortColumns = {
-	'id': 1,
-	'name': 1,
-	'slug': 1,
-	'numPosts': 1
+const slugify = require('./../utils/slugify.js');
+
+const db = {
+	'table': 'Tag',
+	'pageSize': 5,
+	'columns': {
+		'id': { 'sortable': 1, 'filterable': 1 },
+		'name': { 'sortable': 1, 'filterable': 1 },
+		'slug': { 'sortable': 1, 'filterable': 1 },
+		'numPosts': { 'sortable': 1, 'filterable': 1 },
+	}
 };
 
-Tag.getOne = function*(id) {
+Tag.getOne = function*(tagId) {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, id);
+	        const queryResult = connection.query(queryString, tagId);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -21,6 +26,17 @@ Tag.getOne = function*(id) {
 	    }).catch((err) => {
 	    	throw new Error('Error in Tag.getOne: ' + err.message);
 	    });
+}
+
+Tag.getOneFormatted = function*(tagId) {
+	const unformattedTag = yield Tag.getOne(tagId);
+
+	if(unformattedTag) {
+		return yield formatTag(unformattedTag);
+	}
+	else {
+		return null;
+	}
 }
 
 // Imposes no 'pagination' limits, for internal use only
@@ -39,15 +55,20 @@ Tag._getLimitless = function*(tagIds) {
 	    });
 }
 
-// TODO: refactor this the same way that post.js has been done
-Tag.get = function*(page = 0, sort = '-id', searchTerm) {
-	const offset = page * tagsPerPage;
-	const orderString = parseSortParam(sort);
-	const queryString = 'SELECT * FROM `Tag` ORDER BY ' + orderString + ' LIMIT ? OFFSET ?';
-	
+Tag.get = function*(params) {
+	const options = {
+		page: params.page || 0,
+		sort: params.sort || '-id', 
+		filter: params.filter || null,
+		query: params.query || null,
+		fields: params.fields || null,
+	};
+
+	const queryString = mysql.buildSelectQueryString(db, options);
+
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [tagsPerPage, offset]);
+	        const queryResult = connection.query(queryString);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -55,6 +76,37 @@ Tag.get = function*(page = 0, sort = '-id', searchTerm) {
 	    }).catch((err) => {
 	        throw new Error('Error in Tag.get: ' + err.message);
 	    });
+}
+
+Tag.getFormatted = function*(params) {
+	const unformattedTags = yield Tag.get(params);
+
+	if(unformattedTags.length) {
+		return yield formatTags(unformattedTags);
+	}
+	else {
+		return [];
+	}
+}
+
+function* formatTag(tag) {
+	const formattedTags = yield formatTags([tag]);
+
+	return formattedTags[0];
+}
+
+// Take tag objects straight from the DB and transform them into a view-ready format
+function* formatTags(tags) {
+	// Need the router to be able to use named routes for links
+	const tagRoutes = require('./../apps/www/tags/routes.js');
+
+	// Do the actual formatting
+	for(let tag of tags) {
+		// Handle links
+		tag.href = tagRoutes.url('show', tag.id, tag.slug);
+	}
+
+	return tags;
 }
 
 Tag.create = function*(name) {
@@ -73,13 +125,13 @@ Tag.create = function*(name) {
 	    });
 }
 
-Tag.update = function*(id, name) {
+Tag.update = function*(tagId, name) {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `Tag` SET `name` = ?, `slug` = ? WHERE `id` = ?';
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [name, slug, id]);
+	        const queryResult = connection.query(queryString, [name, slug, tagId]);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
@@ -87,44 +139,15 @@ Tag.update = function*(id, name) {
 	    });
 }
 
-Tag.delete = function*(id) {
+Tag.delete = function*(tagId) {
 	const queryString = 'DELETE FROM `Tag` WHERE `id` = ?';
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, id);
+	        const queryResult = connection.query(queryString, tagId);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
 	        throw new Error('Error in Tag.delete: ' + err.message);
 	    });
-}
-
-function slugify(name) {
-	return name.replace(/ /g, '-').toLowerCase();
-}
-
-function parseSortParam(queryStringChunk) {
-	const items = queryStringChunk.split(',');
-	const orderBy = [];
-
-	for(let item of items) {
-		let direction = '';
-
-		// Starting with a '-' indicates a DESC order for this field
-		if(item.charAt(0) === '-') {
-			direction = ' DESC'
-			item = item.substr(1); // Strip '-' character
-		}
-
-		// Ensure that only columns we want to be sortable are accepted
-		if(validSortColumns[item]) {
-			orderBy.push('`' + item + '`' + direction); 
-		}
-		else {
-			throw new Error('Error in parseSortParam: Invalid column for sorting');
-		}
-	}
-
-	return orderBy.join(', ');
 }

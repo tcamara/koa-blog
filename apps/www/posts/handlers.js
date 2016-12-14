@@ -1,7 +1,8 @@
 const postHandler = module.exports = {};
 
-// Set up post model
 const Post = require('./../../../models/post.js');
+const Tag = require('./../../../models/tag.js');
+const PostTag = require('./../../../models/postTag.js');
 
 postHandler.index = function*() {
 	const query = this.request.query;
@@ -77,25 +78,6 @@ postHandler.delete = function*() {
 	Post.delete(this.params.postId);
 
 	this.redirect(postRoutes.url('index'));
-};
-
-// TODO: query the tag first, then the associated posts
-postHandler.tag = function*() {
-	const query = this.request.query;
-	const posts = yield Post.getFormatted({
-		page: query.page, 
-		sort: query.sort, 
-		filter: {
-			'tagId': this.params.tagId,
-			'slug': this.params.slug
-		},
-		fields: query.fields,
-	});
-
-	yield this.render('posts/list', {
-		title: 'Posts Tagged ',
-		posts,
-	});
 };
 
 // TODO: add a tag to a post

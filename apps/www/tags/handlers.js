@@ -2,6 +2,8 @@ const tagHandler = module.exports = {};
 
 // Set up tag model
 const Tag = require('./../../../models/tag.js');
+const Post = require('./../../../models/post.js');
+const PostTag = require('./../../../models/postTag.js');
 
 tagHandler.index = function*() {
 	// Need the router to be able to use named routes for links
@@ -28,7 +30,6 @@ tagHandler.index = function*() {
 
 	yield this.render('tags/list', {
 		title: 'Tags',
-		header: 'Tags',
 		tags,
 	});
 };
@@ -39,7 +40,6 @@ tagHandler.new = function*() {
 
 	yield this.render('tags/new', {
 		title: 'New Tag',
-		header: 'New Tag',
 		action: tagRoutes.url('create')
 	});
 };
@@ -54,27 +54,34 @@ tagHandler.create = function*() {
 };
 
 tagHandler.show = function*() {
-	// Need the router to be able to use named routes for links
-	const tagRoutes = require('./routes.js');
+	const tag = yield Tag.getOneFormatted(this.params.tagId);
 
-	const tag = yield Tag.getOne(this.params.tagId);
+	if(tag != null) {
+		const postIds = yield PostTag.getPostIdsByTag(tag.id);
 
-	if(typeof tag != 'undefined') {
-		yield this.render('tags/show', {
-			header: tag.title,
-			id: tag.id,
-			title: tag.title,
-			slug: tag.slug,
-			user: tag.author,
-			timestamp: tag.timestamp,
-			editTimestamp: tag.editTimestamp,
-			content: tag.content,
-			href: tagRoutes.url('show', tag.id, tag.slug),
-		});
+		if(postIds.length) {
+			const query = this.request.query;
+			const posts = yield Post.getFormatted({
+				page: query.page, 
+				sort: query.sort, 
+				customWhere: '`id` IN (' + postIds.join() + ')',
+				fields: query.fields,
+			});
+
+			yield this.render('posts/list', {
+				title: 'Posts Tagged ' + tag.name,
+				posts,
+			});
+		}
+		else {
+			yield this.render('tags/noPosts', {
+				title: 'No Posts Found',
+			});
+		}
 	}
-	else { // the requested tag is not defined, display the not found page
+	else {
 		yield this.render('tags/notFound', {
-			header: 'Tag Not Found',
+			title: 'Tag Not Found',
 		});
 	}
 };
@@ -98,16 +105,31 @@ tagHandler.delete = function*() {
 };
 
 // TODO: index, but only within the given tag
-tagHandler.tag = function*() {
-	
+tagHandler.post = function*() {
+	const tag = yield Tag.getOneFormatted(this.params.tagId);
+
+	const postIds = yield PostTag.getPostIdsByTag(tag.id);
+
+	const query = this.request.query;
+	const posts = yield Post.getFormatted({
+		page: query.page, 
+		sort: query.sort, 
+		customWhere: '`id` IN (' + postIds.join() + ')',
+		fields: query.fields,
+	});
+
+	yield this.render('posts/list', {
+		title: 'Posts Tagged ' + tag.name,
+		posts,
+	});
 };
 
 // TODO: add a tag to a post
-tagHandler.addTag = function*() {
+tagHandler.addPost = function*() {
 	
 };
 
 // TODO: remove a tag from a post
-tagHandler.removeTag = function*() {
+tagHandler.removePost = function*() {
 	
 };
