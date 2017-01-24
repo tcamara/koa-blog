@@ -11,9 +11,9 @@ INSERT INTO `Tag` (`id`, `name`, `slug`, `numPosts`) VALUES
 (1,	'Test Tag',	'test-tag',	1),
 (2,	'First Tag',	'first-tag',	0);
 
-INSERT INTO `User` (`id`, `name`, `email`, `numPosts`, `password`, `bio`) VALUES
-(1,	'Tim Camara',	'tcamara21@gmail.com',	2,	'test',	'This is a bio about me.'),
-(2,	'Test Testington',	'test@test.com',	0,	'testing',	'This is a test bio.');
+INSERT INTO `User` (`id`, `name`, `slug`, `email`, `numPosts`, `password`, `bio`) VALUES
+(1,	'Tim Camara',	'tim-camara', 'tcamara21@gmail.com',	2,	'test',	'This is a bio about me.'),
+(2,	'Test Testington',	'test-testington', 'test@test.com',	0,	'testing',	'This is a test bio.');
 
 INSERT INTO `Setting` (`key`, `value`) VALUES
 ('blogName',	'Take Five'),

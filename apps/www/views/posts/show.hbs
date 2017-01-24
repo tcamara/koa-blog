@@ -1,23 +1,23 @@
 {{#if post}}
-<div class="post inner">
-	<h1>{{post.title}}</h1>
+	<div class="post inner">
+		<h1>{{post.title}}</h1>
 
-	<div class="byline">
-		Posted by <a href="{{post.author.link}}">{{post.author.name}}</a> {{beautifyDate post.timestamp}}
-	</div>
-
-	<div class="contents">
-		{{{post.content}}}
-	</div>
-
-	{{#if post.tags}}
-		<div class="tags">
-			{{#each post.tags}}
-				<a href="{{this.link}}">{{this.name}}</a>
-			{{/each}}
+		<div class="byline">
+			Posted by <a href="{{post.author.link}}">{{post.author.name}}</a> {{beautifyDate post.timestamp}}
 		</div>
-	{{/if}}
-</div>
+
+		<div class="contents">
+			{{{post.content}}}
+		</div>
+
+		{{#if post.tags}}
+			<div class="tags">
+				{{#each post.tags}}
+					<a href="{{this.link}}">{{this.name}}</a>
+				{{/each}}
+			</div>
+		{{/if}}
+	</div>
 {{else}}
-	Sorry, this post was not found
+	Sorry, this post was not found.
 {{/if}}

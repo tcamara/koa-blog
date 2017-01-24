@@ -1,5 +1,7 @@
 const Tag = module.exports = {};
 
+const PostTag = require('./postTag.js');
+const mysql = require('./../mysql.js');
 const slugify = require('./../utils/slugify.js');
 
 const db = {
@@ -107,6 +109,50 @@ function* formatTags(tags) {
 	}
 
 	return tags;
+}
+
+Tag.getByPosts = function*(posts) {
+	// Need the router to be able to use named routes for links
+	const tagRoutes = require('./../apps/www/tags/routes.js');
+
+	// Grab all the unique post IDs
+	const postIds = {};
+	for(let post of posts) {
+		postIds[post.id] = [];
+	}
+
+	// Get all the tag IDs that are associated with our posts
+	const postTags = yield PostTag.getByPosts(Object.keys(postIds));
+
+	// Grab all the tag IDs
+	const tagIds = {};
+	for(let tag of postTags) {
+		tagIds[tag.tagId] = 1;
+	}
+
+	// Return nothing if these posts have no tags
+	if(Object.keys(tagIds).length == 0) {
+		return {};
+	}
+
+	// Get the tag data for all tags associated with our posts
+	const tagList = yield Tag._getLimitless(Object.keys(tagIds));
+
+	// Assign tag to tagId in hash
+	for(let tag of tagList) {
+		tag.link = tagRoutes.url('show', tag.id, tag.slug);
+		tagIds[tag.id] = tag;
+	}
+
+	for(let postId in postIds) {
+		for(let postTag of postTags) {
+			if(postTag.postId == postId) {
+				postIds[postId].push(tagIds[postTag.tagId]);
+			}
+		}
+	}
+
+	return postIds;
 }
 
 Tag.create = function*(name) {

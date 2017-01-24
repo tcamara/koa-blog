@@ -1,32 +1,18 @@
 const tagHandler = module.exports = {};
 
-// Set up tag model
+// Set up models
 const Tag = require('./../../../models/tag.js');
 const Post = require('./../../../models/post.js');
 const PostTag = require('./../../../models/postTag.js');
 
 tagHandler.index = function*() {
-	// Need the router to be able to use named routes for links
-	const tagRoutes = require('./routes.js');
-
-	const tagResults = yield Tag.get(
-		this.request.query.page, 
-		this.request.query.sort, 
-		this.request.query.q
-	);
-
-	const tags = [];
-	for(let tag of tagResults) {
-		const tagLink = tagRoutes.url('show', tag.id, tag.slug);
-
-		tags.push({
-			id: tag.id,
-			name: tag.name,
-			slug: tag.slug,
-			numPosts: tag.numPosts,
-			href: tagLink,
-		});
-	}
+	const query = this.request.query;
+	const tags = yield Tag.getFormatted({
+		page: query.page, 
+		sort: query.sort, 
+		query: query.q,
+		fields: query.fields,
+	});
 
 	yield this.render('tags/list', {
 		title: 'Tags',
@@ -102,34 +88,4 @@ tagHandler.delete = function*() {
 	Tag.delete(this.params.tagId);
 
 	this.redirect(tagRoutes.url('index'));
-};
-
-// TODO: index, but only within the given tag
-tagHandler.post = function*() {
-	const tag = yield Tag.getOneFormatted(this.params.tagId);
-
-	const postIds = yield PostTag.getPostIdsByTag(tag.id);
-
-	const query = this.request.query;
-	const posts = yield Post.getFormatted({
-		page: query.page, 
-		sort: query.sort, 
-		customWhere: '`id` IN (' + postIds.join() + ')',
-		fields: query.fields,
-	});
-
-	yield this.render('posts/list', {
-		title: 'Posts Tagged ' + tag.name,
-		posts,
-	});
-};
-
-// TODO: add a tag to a post
-tagHandler.addPost = function*() {
-	
-};
-
-// TODO: remove a tag from a post
-tagHandler.removePost = function*() {
-	
 };

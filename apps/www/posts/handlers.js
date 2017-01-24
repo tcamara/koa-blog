@@ -82,10 +82,16 @@ postHandler.delete = function*() {
 
 // TODO: add a tag to a post
 postHandler.addTag = function*() {
-	
+	PostTag.create(
+		this.params.postId,
+		this.params.tagId
+	);
 };
 
 // TODO: remove a tag from a post
 postHandler.removeTag = function*() {
-	
+	PostTag.delete(
+		this.params.postId,
+		this.params.tagId
+	);
 };

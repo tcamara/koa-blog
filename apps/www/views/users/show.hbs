@@ -1,0 +1,10 @@
+{{#if user}}
+	<h1>{{user.name}}</h1>
+
+	<span>({{user.email}})</span><br />
+
+	<span>{{user.numPosts}} Posts</span><br />
+	<p>{{user.bio}}</p>
+{{else}}
+	Sorry, this user was not found.
+{{/if}}

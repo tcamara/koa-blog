@@ -2,7 +2,6 @@ const Post = module.exports = {};
 
 const fs = require('fs');
 const path = require('path');
-const PostTag = require('./postTag.js');
 const Tag = require('./tag.js');
 const User = require('./user.js');
 const mysql = require('./../mysql.js');
@@ -113,10 +112,10 @@ function* formatPosts(posts) {
 	const postRoutes = require('./../apps/www/posts/routes.js');
 
 	// Get all the user data for users that are associated with our posts
-	const users = yield getUsers(posts);
+	const users = yield User.getByPosts(posts);
 
 	// Get all the tag data for tags that are associated with our posts
-	const tags = yield getTags(posts);
+	const tags = yield Tag.getByPosts(posts);
 
 	// Do the actual formatting
 	for(let post of posts) {
@@ -134,73 +133,6 @@ function* formatPosts(posts) {
 	}
 
 	return posts;
-}
-
-// TODO: move this into the user model?
-function* getUsers(posts) {
-	// Need the router to be able to use named routes for links
-	const userRoutes = require('./../apps/www/users/routes.js');
-
-	const authorIds = {};
-	for(let post of posts) {
-		authorIds[post.authorId] = 1;
-	}
-
-	// Get the author data for our posts
-	const users = yield User._getLimitless(Object.keys(authorIds));
-
-	// Assign user to authorId in hash
-	for(let user of users) {
-		user.link = userRoutes.url('show', user.id);
-		authorIds[user.id] = user;
-	}
-
-	return authorIds;
-}
-
-// TODO: move this into the tag model?
-function* getTags(posts) {
-	// Need the router to be able to use named routes for links
-	const tagRoutes = require('./../apps/www/tags/routes.js');
-
-	// Grab all the unique post IDs
-	const postIds = {};
-	for(let post of posts) {
-		postIds[post.id] = [];
-	}
-
-	// Get all the tag IDs that are associated with our posts
-	const postTags = yield PostTag.getByPosts(Object.keys(postIds));
-
-	// Grab all the tag IDs
-	const tagIds = {};
-	for(let tag of postTags) {
-		tagIds[tag.tagId] = 1;
-	}
-
-	// Return nothing if these posts have no tags
-	if(Object.keys(tagIds).length == 0) {
-		return {};
-	}
-
-	// Get the tag data for all tags associated with our posts
-	const tagList = yield Tag._getLimitless(Object.keys(tagIds));
-
-	// Assign tag to tagId in hash
-	for(let tag of tagList) {
-		tag.link = tagRoutes.url('show', tag.id, tag.slug);
-		tagIds[tag.id] = tag;
-	}
-
-	for(let postId in postIds) {
-		for(let postTag of postTags) {
-			if(postTag.postId == postId) {
-				postIds[postId].push(tagIds[postTag.tagId]);
-			}
-		}
-	}
-
-	return postIds;
 }
 
 Post.create = function*(title, authorId, content, image) {
@@ -242,7 +174,7 @@ function* moveImage(image) {
 
 Post.update = function*(postId, title, authorId, content) {
 	const slug = slugify(title);
-	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `editTimestamp` = now(), `content` = ? WHERE `id` = ?';
+	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `content` = ? WHERE `id` = ?';
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
