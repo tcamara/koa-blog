@@ -1,5 +1,10 @@
 # koa-blog
-A simple blog platform using Koa rather than Express
+A simple blog platform using Koa
+
+## Requirements
+- MySQL
+- NodeJS
+- NPM (usually installed along with node)
 
 ## To get started
 1. Create a new database and database user (feel free to change details):
@@ -12,8 +17,11 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 ```
 2. Create the tables specified in createTables.sql
 3. (Optional) use the data specified in populateTestData.sql to populate test data
-4. Create the file `.env` in this project's root directory
-5. Populate the file with the required env variables (just the ones in mysql.js for now), using the values from step 1
+4. Rename the file `.env-template` to `.env`
+5. Populate the file with the required env variables using the values from step 1
+6. Run `npm install` to pull down dependencies
+7. Run `npm start` to start the application
+8. Your app should now be accessible on localhost at the port specified in the `.env` file
 
 
 ## Routes:

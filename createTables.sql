@@ -5,8 +5,8 @@ CREATE TABLE `Post` (
   `title` varchar(100) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `authorId` int(11) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `editTimestamp` timestamp NOT NULL,
+  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `editTimestamp` datetime ON UPDATE CURRENT_TIMESTAMP,
   `content` mediumtext NOT NULL,
   `image` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)

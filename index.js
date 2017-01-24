@@ -60,6 +60,6 @@ app.use(function *(next) {
 app.use(mount('/api', apiApp));
 app.use(mount('/', wwwApp));
 
-// Start up the server on port 3000
-app.listen(3000);
-console.log('listening');         
+// Start up the server on the .env specified port
+app.listen(process.env.APP_PORT);
+console.log('listening on port ' + process.env.APP_PORT);         
