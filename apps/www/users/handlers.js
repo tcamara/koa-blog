@@ -1,11 +1,12 @@
 const userHandler = module.exports = {};
 
-// Set up models
-const User = require('./../../../models/user.js');
+const UserModel = require('./../../../models/user.js');
+
+let userRoutes = null;
 
 userHandler.index = function*() {
 	const query = this.request.query;
-	const users = yield User.getFormatted({
+	const users = yield UserModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
@@ -19,43 +20,34 @@ userHandler.index = function*() {
 };
 
 userHandler.new = function*() {
-	// Need the router to be able to use named routes for the form action
-	const userRoutes = require('./routes.js');
-
 	yield this.render('users/new', {
 		title: 'New User',
-		action: userRoutes.url('create')
+		action: _getUserRoute('create')
 	});
 };
 
 userHandler.create = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const userRoutes = require('./routes.js');
-
-	const newUserId = yield User.create(
+	const newUserId = yield UserModel.create(
 		this.request.body.name,
 		this.request.body.email,
 		this.request.body.password,
 		this.request.body.bio
 	);
 
-	this.redirect(userRoutes.url('show', newUserId));
+	this.redirect(_getUserRoute('show', newUserId));
 };
 
 userHandler.show = function*() {
-	const user = yield User.getOneFormatted(this.params.userId);
+	const user = yield UserModel.getOneFormatted(this.params.userId);
 
 	yield this.render('users/show', {
-		title: user ? user.title : 'Post Not Found',
+		title: user ? user.title : 'User Not Found',
 		user,
 	});
 };
 
 userHandler.update = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const userRoutes = require('./routes.js');
-
-	User.update(
+	UserModel.update(
 		this.params.userId, 
 		this.params.name,
 		this.params.email,
@@ -63,14 +55,19 @@ userHandler.update = function*() {
 		this.params.bio
 	);
 
-	this.redirect(userRoutes.url('show', this.params.userId));
+	this.redirect(_getUserRoute('show', this.params.userId));
 };
 
 userHandler.delete = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const userRoutes = require('./routes.js');
+	UserModel.delete(this.params.userId);
 
-	User.delete(this.params.userId);
-
-	this.redirect(userRoutes.url('index'));
+	this.redirect(_getUserRoute('index'));
 };
+
+function _getUserRoute(...args) {
+	if (userRoutes === null) {
+		userRoutes = require('./routes.js');
+	}
+
+	return userRoutes.url(...args);
+}

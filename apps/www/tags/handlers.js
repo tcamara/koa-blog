@@ -1,13 +1,14 @@
 const tagHandler = module.exports = {};
 
-// Set up models
-const Tag = require('./../../../models/tag.js');
-const Post = require('./../../../models/post.js');
-const PostTag = require('./../../../models/postTag.js');
+const TagModel = require('./../../../models/tag.js');
+const PostModel = require('./../../../models/post.js');
+const PostTagModel = require('./../../../models/postTag.js');
+
+let tagRoutes = null;
 
 tagHandler.index = function*() {
 	const query = this.request.query;
-	const tags = yield Tag.getFormatted({
+	const tags = yield TagModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
@@ -21,49 +22,39 @@ tagHandler.index = function*() {
 };
 
 tagHandler.new = function*() {
-	// Need the router to be able to use named routes for the form action
-	const tagRoutes = require('./routes.js');
-
 	yield this.render('tags/new', {
 		title: 'New Tag',
-		action: tagRoutes.url('create')
+		action: _getTagRoute('create')
 	});
 };
 
 tagHandler.create = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const tagRoutes = require('./routes.js');
+	const newTagId = yield TagModel.create(this.request.body.name);
 
-	const newTagId = yield Tag.create(this.request.body.name);
-
-	this.redirect(tagRoutes.url('show', newTagId));
+	this.redirect(_getTagRoute('show', newTagId));
 };
 
 tagHandler.show = function*() {
-	const tag = yield Tag.getOneFormatted(this.params.tagId);
+	const tag = yield TagModel.getOneFormatted(this.params.tagId);
 
-	if(tag != null) {
-		const postIds = yield PostTag.getPostIdsByTag(tag.id);
+	if (tag != null) {
+		const postIds = yield PostTagModel.getPostIdsByTag(tag.id);
+		let posts = null;
 
-		if(postIds.length) {
+		if (postIds.length) {
 			const query = this.request.query;
-			const posts = yield Post.getFormatted({
+			posts = yield PostModel.getFormatted({
 				page: query.page, 
 				sort: query.sort, 
 				customWhere: '`id` IN (' + postIds.join() + ')',
 				fields: query.fields,
 			});
+		}
 
-			yield this.render('posts/list', {
-				title: 'Posts Tagged ' + tag.name,
-				posts,
-			});
-		}
-		else {
-			yield this.render('tags/noPosts', {
-				title: 'No Posts Found',
-			});
-		}
+		yield this.render('posts/list', {
+			title: posts ? ('Posts Tagged ' + tag.name) : 'No Posts Found',
+			posts,
+		});
 	}
 	else {
 		yield this.render('tags/notFound', {
@@ -73,19 +64,21 @@ tagHandler.show = function*() {
 };
 
 tagHandler.update = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const tagRoutes = require('./routes.js');
+	TagModel.update(this.params.tagId, this.params.name);
 
-	Tag.update(this.params.tagId, this.params.name);
-
-	this.redirect(tagRoutes.url('show', this.params.tagId));
+	this.redirect(_getTagRoute('show', this.params.tagId));
 };
 
 tagHandler.delete = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const tagRoutes = require('./routes.js');
+	TagModel.delete(this.params.tagId);
 
-	Tag.delete(this.params.tagId);
-
-	this.redirect(tagRoutes.url('index'));
+	this.redirect(_getTagRoute('index'));
 };
+
+function _getTagRoute(...args) {
+	if (tagRoutes === null) {
+		tagRoutes = require('./routes.js');
+	}
+
+	return tagRoutes.url(...args);
+}

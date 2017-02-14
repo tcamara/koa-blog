@@ -1,12 +1,13 @@
 const postHandler = module.exports = {};
 
-const Post = require('./../../../models/post.js');
-const Tag = require('./../../../models/tag.js');
-const PostTag = require('./../../../models/postTag.js');
+const PostModel = require('./../../../models/post.js');
+const PostTagModel = require('./../../../models/postTag.js');
+
+let postRoutes = null;
 
 postHandler.index = function*() {
 	const query = this.request.query;
-	const posts = yield Post.getFormatted({
+	const posts = yield PostModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
@@ -20,36 +21,30 @@ postHandler.index = function*() {
 };
 
 postHandler.new = function*() {
-	// Need the router to be able to use named routes for the form action
-	const postRoutes = require('./routes.js');
-
 	yield this.render('posts/new', {
 		title: 'New Post',
-		action: postRoutes.url('create'),
+		action: _getPostRoute('create'),
 		hasEditor: true,
 	});
 };
 
 postHandler.create = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
-
 	const params = this.request.body;
 
 	// TODO: base this on current user
 	const author = 1;
-	const newPostId = yield Post.create(
+	const newPostId = yield PostModel.create(
 		params.fields.title, 
 		author, 
 		params.fields.content, 
 		params.files.image
 	);
 
-	this.redirect(postRoutes.url('show', newPostId));
+	this.redirect(_getPostRoute('show', newPostId));
 };
 
 postHandler.show = function*() {
-	const post = yield Post.getOneFormatted(this.params.postId);
+	const post = yield PostModel.getOneFormatted(this.params.postId);
 
 	yield this.render('posts/show', {
 		title: post ? post.title : 'Post Not Found',
@@ -58,40 +53,40 @@ postHandler.show = function*() {
 };
 
 postHandler.update = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
-
-	Post.update(
+	PostModel.update(
 		this.params.postId, 
 		this.params.title, 
 		this.params.author, 
 		this.params.content
 	);
 
-	this.redirect(postRoutes.url('show', this.params.postId));
+	this.redirect(_getPostRoute('show', this.params.postId));
 };
 
 postHandler.delete = function*() {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
+	PostModel.delete(this.params.postId);
 
-	Post.delete(this.params.postId);
-
-	this.redirect(postRoutes.url('index'));
+	this.redirect(_getPostRoute('index'));
 };
 
-// TODO: add a tag to a post
 postHandler.addTag = function*() {
-	PostTag.create(
+	PostTagModel.create(
 		this.params.postId,
 		this.params.tagId
 	);
 };
 
-// TODO: remove a tag from a post
 postHandler.removeTag = function*() {
-	PostTag.delete(
+	PostTagModel.delete(
 		this.params.postId,
 		this.params.tagId
 	);
 };
+
+function _getPostRoute(...args) {
+	if (postRoutes === null) {
+		postRoutes = require('./routes.js');
+	}
+
+	return postRoutes.url(...args);
+}

@@ -1,6 +1,6 @@
 const Tag = module.exports = {};
 
-const PostTag = require('./postTag.js');
+const PostTagModel = require('./postTag.js');
 const mysql = require('./../mysql.js');
 const slugify = require('./../utils/slugify.js');
 
@@ -122,7 +122,7 @@ Tag.getByPosts = function*(posts) {
 	}
 
 	// Get all the tag IDs that are associated with our posts
-	const postTags = yield PostTag.getByPosts(Object.keys(postIds));
+	const postTags = yield PostTagModel.getByPosts(Object.keys(postIds));
 
 	// Grab all the tag IDs
 	const tagIds = {};

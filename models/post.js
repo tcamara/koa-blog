@@ -2,8 +2,8 @@ const Post = module.exports = {};
 
 const fs = require('fs');
 const path = require('path');
-const Tag = require('./tag.js');
-const User = require('./user.js');
+const TagModel = require('./tag.js');
+const UserModel = require('./user.js');
 const mysql = require('./../mysql.js');
 const slugify = require('./../utils/slugify.js');
 
@@ -112,10 +112,10 @@ function* formatPosts(posts) {
 	const postRoutes = require('./../apps/www/posts/routes.js');
 
 	// Get all the user data for users that are associated with our posts
-	const users = yield User.getByPosts(posts);
+	const users = yield UserModel.getByPosts(posts);
 
 	// Get all the tag data for tags that are associated with our posts
-	const tags = yield Tag.getByPosts(posts);
+	const tags = yield TagModel.getByPosts(posts);
 
 	// Do the actual formatting
 	for(let post of posts) {
@@ -141,10 +141,11 @@ Post.create = function*(title, authorId, content, image) {
 	
 	const slug = slugify(title);
 	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `authorId`, `timestamp`, `content`, `image`) VALUES (?, ?, ?, now(), ?, ?)';
+	const queryParams = [title, slug, authorId, content, image.name];
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [title, slug, authorId, content, image.name]);
+	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -175,10 +176,11 @@ function* moveImage(image) {
 Post.update = function*(postId, title, authorId, content) {
 	const slug = slugify(title);
 	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `content` = ? WHERE `id` = ?';
-	
+	const queryParams = [title, slug, authorId, content, postId];
+
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [title, slug, authorId, content, postId]);
+	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {

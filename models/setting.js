@@ -1,6 +1,5 @@
 const Setting = module.exports = {};
 
-
 Setting.getOne = function*(key) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` = ?';
 

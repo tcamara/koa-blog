@@ -137,10 +137,11 @@ User.getByPosts = function*(posts) {
 User.create = function*(name, email, password, bio) {
 	const slug = slugify(name);
 	const queryString = 'INSERT INTO `User` (`name`, `slug`, `email`, `password`, `bio`) VALUES (?, ?, ?, ?, ?)';
+	const queryParams = [name, slug, email, password, bio];
 
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [name, slug, email, password, bio]);
+	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
@@ -153,10 +154,11 @@ User.create = function*(name, email, password, bio) {
 User.update = function*(userId, name, email, password, bio) {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `User` SET `name` = ?, `slug` = ?, `email` = ?, `password` = ?, `bio` = ?, WHERE `id` = ?';
+	const queryParams = [name, slug, email, password, bio, userId];
 	
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [name, slug, email, password, bio, userId]);
+	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
 	        return queryResult;
 	    }).catch((err) => {
