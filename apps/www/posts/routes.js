@@ -3,6 +3,8 @@ const koaBody = require('koa-body')({
 	multipart: true
 });
 
+const passport = require('./../../../auth/auth.js');
+
 const postRouter = new Router();
 
 const postHandler = require('./handlers.js');
@@ -23,7 +25,7 @@ postRouter.post('addTag', '/:postId/tags/:tagId', postHandler.addTag);
 postRouter.delete('removeTag', '/:postId/tags/:tagId', postHandler.removeTag);
 
 // Show single post
-postRouter.get('show', '/:postId/:slug?', postHandler.show);
+postRouter.get('show', '/:postId/:slug?', requireAuthentication, postHandler.show);
 
 // Update post submission
 postRouter.post('update', '/:postId', koaBody, postHandler.update);
@@ -32,3 +34,12 @@ postRouter.post('update', '/:postId', koaBody, postHandler.update);
 postRouter.delete('delete', '/:postId', postHandler.delete);
 
 module.exports = postRouter;
+
+function* requireAuthentication(next) {
+	if (this.isAuthenticated()) {
+		yield next;
+	}
+	else {
+		this.redirect('/session');
+	}
+};

@@ -8,15 +8,18 @@ const mount = require('koa-mount');
 const serve = require('koa-static');
 const mysql = require('./mysql');
 const Setting = require('./models/setting.js');
+
+const passport = require('./auth/auth.js');
+const session = require('koa-generic-session');
+
 const app = koa();
+
+app.keys = [process.env.SESSION_SECRET];
+app.use(session());
 
 // Set appRoot and webroot for file uploads
 global.appRoot = path.resolve(__dirname);
 global.webRoot = path.join(appRoot, '/public');
-
-// Include each sub-application
-const wwwApp = require('./apps/www/index.js');
-const apiApp = require('./apps/api/index.js');
 
 // Logger
 app.use(logger());
@@ -55,6 +58,14 @@ app.use(function *(next) {
 		this.app.emit('error', err, this);
 	}
 });
+
+// Include each sub-application
+const wwwApp = require('./apps/www/index.js');
+const apiApp = require('./apps/api/index.js');
+
+// Set up authentication and session handling
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Use koa-mount to mount each sub-application on its own path
 app.use(mount('/api', apiApp));

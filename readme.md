@@ -31,8 +31,9 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 | Route                  | Permissions | Description            |
 | ---------------------- | ----------- | ---------------------- |
 | GET /                  | Guest       | show homepage          |
-| POST /session          | Guest       | log user in            |
-| DELETE /session        | Member      | log user out           |
+| GET /session           | Guest       | show login page        |
+| POST /session          | Guest       | log current user in    |
+| DELETE /session        | Member      | log current user out   |
 
 ### Posts
 
