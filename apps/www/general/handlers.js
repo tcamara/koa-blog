@@ -1,11 +1,11 @@
 const generalHandler = module.exports = {};
 
-// const PostModel = require('./../../../models/post.js');
-// const PostTagModel = require('./../../../models/postTag.js');
-
 let generalRoutes = null;
 
 generalHandler.index = function*() {
+	// TODO: figure out why this isn't an actual user object once you're logged in
+	console.log(this.req.user);
+
 	yield this.render('general/index', {
 		title: 'Index',
 		content: 'Index content',
@@ -21,14 +21,11 @@ generalHandler.new = function*() {
 
 generalHandler.create = function*() {
 	const params = this.request.body;
-	console.log(params);
-
+	
 	this.redirect(_getGeneralRoute('index'));
 };
 
 generalHandler.delete = function*() {
-	
-
 	this.redirect(_getGeneralRoute('index'));
 };
 

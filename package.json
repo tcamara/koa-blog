@@ -27,7 +27,7 @@
     "koa-router": "^5.4.0",
     "koa-static": "^2.0.0",
     "mysql2": "^1.0.0-rc.7",
-    "passport-google-oauth": "^1.0.0",
+    "passport-google-oauth20": "^1.0.0",
     "passport-local": "^1.0.0"
   },
   "devDependencies": {

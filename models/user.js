@@ -20,15 +20,25 @@ const db = {
 User.getOne = function*(userId) {
 	const queryString = 'SELECT * FROM `User` WHERE `id` = ?';
 
+	return yield _rawGet(queryString, userId);
+}
+
+User.getByField = function*(fieldName, fieldValue) {
+	const queryString = 'SELECT * FROM `User` WHERE `' + fieldName + '` = ?';
+
+	return yield _rawGet(queryString, fieldValue);
+}
+
+function* _rawGet(queryString, value) {
 	return yield global.connectionPool.getConnection()
 	    .then((connection) => {
-	        const queryResult = connection.query(queryString, userId);
+	        const queryResult = connection.query(queryString, value);
 	        connection.release();
 	        return queryResult;
 	    }).then((result) => {
 	        return result[0][0];
 	    }).catch((err) => {
-	    	throw new Error('Error in User.getOne: ' + err.message);
+	    	throw new Error('Error in User._rawGet: ' + err.message);
 	    });
 }
 

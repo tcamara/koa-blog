@@ -34,11 +34,12 @@ DROP TABLE IF EXISTS `User`;
 
 CREATE TABLE `User` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `googleId` varchar(21),
   `name` varchar(100) NOT NULL,
   `slug` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
+  `email` varchar(100),
   `numPosts` int(11) NOT NULL DEFAULT 0,
-  `password` varchar(100) NOT NULL,
+  `password` varchar(100),
   `bio` TEXT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
