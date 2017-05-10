@@ -1,28 +1,25 @@
-const Router = require('koa-router');
+const generalRouter = require('koa-router')();
+const generalHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
 	multipart: true
 });
 const passport = require('./../../../auth/auth.js');
-
-const generalRouter = new Router();
-
-const generalHandler = require('./handlers.js');
-
+generalRouter.get('new', '/session', generalHandler.new);
 // Show home page
 generalRouter.get('index', '/', generalHandler.index);
 
 // Show login page
-generalRouter.get('new', '/session', generalHandler.new);
+
 
 // login page submission
-generalRouter.post('create', '/session', koaBody, passport.authenticate('google', {
+generalRouter.get('create-google', '/session/google', koaBody, passport.authenticate('google', {
 	scope: ['profile'],
 	failureRedirect: '/session',
 }), generalHandler.create);
 
-// generalRouter.post('create', '/session', koaBody, passport.authenticate('local', {
-// 	failureRedirect: '/session',
-// }), generalHandler.create);
+generalRouter.post('create', '/session', koaBody, passport.authenticate('local', {
+	failureRedirect: '/session',
+}), generalHandler.create);
 
 // login OAuth return page
 generalRouter.get('googleCallback', '/session/google-callback', koaBody, passport.authenticate('google', { 

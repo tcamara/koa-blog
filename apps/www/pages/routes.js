@@ -1,8 +1,8 @@
-const Router = require('koa-router');
-
-const pageRouter = new Router();
-
+const pageRouter = require('koa-router')();
 const pageHandler = require('./handlers.js');
+const koaBody = require('koa-body')({
+	multipart: true
+});
 
 // Show page list
 pageRouter.get('index', '/', pageHandler.index);

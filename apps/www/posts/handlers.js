@@ -5,81 +5,81 @@ const PostTagModel = require('./../../../models/postTag.js');
 
 let postRoutes = null;
 
-postHandler.index = function*() {
-	const query = this.request.query;
-	const posts = yield PostModel.getFormatted({
+postHandler.index = async (ctx, next) => {
+	const query = ctx.request.query;
+	const posts = await PostModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
 		fields: query.fields,
 	});
 
-	yield this.render('posts/list', {
+	await ctx.render('posts/list', {
 		title: 'Posts',
 		posts,
 	});
 };
 
-postHandler.new = function*() {
-	yield this.render('posts/new', {
+postHandler.new = async (ctx, next) => {
+	await ctx.render('posts/new', {
 		title: 'New Post',
 		action: _getPostRoute('create'),
 		hasEditor: true,
 	});
 };
 
-postHandler.create = function*() {
-	const params = this.request.body;
+postHandler.create = async (ctx, next) => {
+	const params = ctx.request.body;
 
 	// TODO: base this on current user
 	const author = 1;
-	const newPostId = yield PostModel.create(
+	const newPostId = await PostModel.create(
 		params.fields.title, 
 		author, 
 		params.fields.content, 
 		params.files.image
 	);
 
-	this.redirect(_getPostRoute('show', newPostId));
+	ctx.redirect(_getPostRoute('show', newPostId));
 };
 
-postHandler.show = function*() {
-	const post = yield PostModel.getOneFormatted(this.params.postId);
+postHandler.show = async (ctx, next) => {
+	const post = await PostModel.getOneFormatted(ctx.params.postId);
 
-	yield this.render('posts/show', {
+	await ctx.render('posts/show', {
 		title: post ? post.title : 'Post Not Found',
 		post,
 	});
 };
 
-postHandler.update = function*() {
+postHandler.update = async (ctx, next) => {
 	PostModel.update(
-		this.params.postId, 
-		this.params.title, 
-		this.params.author, 
-		this.params.content
+		ctx.params.postId, 
+		ctx.params.title, 
+		ctx.params.author, 
+		ctx.params.content
 	);
 
-	this.redirect(_getPostRoute('show', this.params.postId));
+	ctx.redirect(_getPostRoute('show', ctx.params.postId));
 };
 
-postHandler.delete = function*() {
-	PostModel.delete(this.params.postId);
+postHandler.delete = async (ctx, next) => {
+	PostModel.delete(ctx.params.postId);
 
-	this.redirect(_getPostRoute('index'));
+	ctx.redirect(_getPostRoute('index'));
 };
 
-postHandler.addTag = function*() {
+postHandler.addTag = async (ctx, next) => {
 	PostTagModel.create(
-		this.params.postId,
-		this.params.tagId
+		ctx.params.postId,
+		ctx.params.tagId
 	);
 };
 
-postHandler.removeTag = function*() {
+postHandler.removeTag = async (ctx, next) => {
 	PostTagModel.delete(
-		this.params.postId,
-		this.params.tagId
+		ctx.params.postId,
+		ctx.params.tagId
 	);
 };
 

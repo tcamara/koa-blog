@@ -1,11 +1,8 @@
-const Router = require('koa-router');
+const tagRouter = require('koa-router')();
+const tagHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
 	multipart: true
 });
-
-const tagRouter = new Router();
-
-const tagHandler = require('./handlers.js');
 
 // Show tag list
 tagRouter.get('index', '/', tagHandler.index);

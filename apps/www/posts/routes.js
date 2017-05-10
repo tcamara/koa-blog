@@ -1,13 +1,9 @@
-const Router = require('koa-router');
+const postRouter = require('koa-router')();
+const postHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
 	multipart: true
 });
-
 const passport = require('./../../../auth/auth.js');
-
-const postRouter = new Router();
-
-const postHandler = require('./handlers.js');
 
 // Show post list
 postRouter.get('index', '/', postHandler.index);

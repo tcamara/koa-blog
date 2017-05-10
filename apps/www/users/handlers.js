@@ -4,64 +4,65 @@ const UserModel = require('./../../../models/user.js');
 
 let userRoutes = null;
 
-userHandler.index = function*() {
-	const query = this.request.query;
-	const users = yield UserModel.getFormatted({
+userHandler.index = async (ctx, next) => {
+	const query = ctx.request.query;
+	
+	const users = await UserModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
 		fields: query.fields,
 	});
 
-	yield this.render('users/list', {
+	await ctx.render('users/list', {
 		title: 'Users',
 		users,
 	});
 };
 
-userHandler.new = function*() {
-	yield this.render('users/new', {
+userHandler.new = async (ctx, next) => {
+	await ctx.render('users/new', {
 		title: 'New User',
 		action: _getUserRoute('create')
 	});
 };
 
-userHandler.create = function*() {
-	const newUserId = yield UserModel.create(
-		this.request.body.name,
-		this.request.body.email,
-		this.request.body.password,
-		this.request.body.bio
+userHandler.create = async (ctx, next) => {
+	const newUserId = await UserModel.create(
+		ctx.request.body.name,
+		ctx.request.body.email,
+		ctx.request.body.password,
+		ctx.request.body.bio
 	);
 
-	this.redirect(_getUserRoute('show', newUserId));
+	ctx.redirect(_getUserRoute('show', newUserId));
 };
 
-userHandler.show = function*() {
-	const user = yield UserModel.getOneFormatted(this.params.userId);
+userHandler.show = async (ctx, next) => {
+	const user = await UserModel.getOneFormatted(ctx.params.userId);
 
-	yield this.render('users/show', {
+	await ctx.render('users/show', {
 		title: user ? user.title : 'User Not Found',
 		user,
 	});
 };
 
-userHandler.update = function*() {
+userHandler.update = async (ctx, next) => {
 	UserModel.update(
-		this.params.userId, 
-		this.params.name,
-		this.params.email,
-		this.params.password,
-		this.params.bio
+		ctx.params.userId, 
+		ctx.params.name,
+		ctx.params.email,
+		ctx.params.password,
+		ctx.params.bio
 	);
 
-	this.redirect(_getUserRoute('show', this.params.userId));
+	ctx.redirect(_getUserRoute('show', ctx.params.userId));
 };
 
-userHandler.delete = function*() {
-	UserModel.delete(this.params.userId);
+userHandler.delete = async (ctx, next) => {
+	UserModel.delete(ctx.params.userId);
 
-	this.redirect(_getUserRoute('index'));
+	ctx.redirect(_getUserRoute('index'));
 };
 
 function _getUserRoute(...args) {

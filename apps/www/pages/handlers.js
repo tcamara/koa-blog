@@ -3,14 +3,14 @@ const pageHandler = module.exports = {};
 // Set up post model
 const Post = require('./../../../models/post.js');
 
-pageHandler.index = function*() {
+pageHandler.index = async (ctx, next) => {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
-	const postResults = yield Post.list(
-		this.request.query.page, 
-		this.request.query.sort, 
-		this.request.query.q
+	const postResults = await Post.list(
+		ctx.request.query.page, 
+		ctx.request.query.sort, 
+		ctx.request.query.q
 	);
 
 	const posts = [];
@@ -29,18 +29,18 @@ pageHandler.index = function*() {
 		});
 	}
 
-	yield this.render('posts/list', {
+	await ctx.render('posts/list', {
 		title: 'Posts',
 		header: 'Posts',
 		posts,
 	});
 };
 
-pageHandler.new = function*() {
+pageHandler.new = async (ctx, next) => {
 	// Need the router to be able to use named routes for the form action
 	const postRoutes = require('./routes.js');
 
-	yield this.render('posts/new', {
+	await ctx.render('posts/new', {
 		title: 'New Post',
 		header: 'New Post',
 		content: 'testing',
@@ -48,27 +48,27 @@ pageHandler.new = function*() {
 	});
 };
 
-pageHandler.create = function*() {
+pageHandler.create = async (ctx, next) => {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
-	const params = this.request.body;
+	const params = ctx.request.body;
 
 	// TODO: base this on current user
 	const author = 1;
-	const newPostId = yield Post.create(params.title, author, params.content);
+	const newPostId = await Post.create(params.title, author, params.content);
 
-	this.redirect(postRoutes.url('show', newPostId));
+	ctx.redirect(postRoutes.url('show', newPostId));
 };
 
-pageHandler.show = function*() {
+pageHandler.show = async (ctx, next) => {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./routes.js');
 
-	const post = yield Post.get(this.params.id);
+	const post = await Post.get(ctx.params.id);
 
 	if(typeof post != 'undefined') {
-		yield this.render('posts/show', {
+		await ctx.render('posts/show', {
 			header: post.title,
 			id: post.id,
 			title: post.title,
@@ -81,31 +81,31 @@ pageHandler.show = function*() {
 		});
 	}
 	else { // the requested post is not defined, display the not found page
-		yield this.render('posts/notFound', {
+		await ctx.render('posts/notFound', {
 			header: 'Post Not Found',
 		});
 	}
 };
 
-pageHandler.update = function*() {
+pageHandler.update = async (ctx, next) => {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
 	Post.update(
-		this.params.id, 
-		this.params.title, 
-		this.params.author, 
-		this.params.content
+		ctx.params.id, 
+		ctx.params.title, 
+		ctx.params.author, 
+		ctx.params.content
 	);
 
-	this.redirect(postRoutes.url('show', this.params.id));
+	ctx.redirect(postRoutes.url('show', ctx.params.id));
 };
 
-pageHandler.delete = function*() {
+pageHandler.delete = async (ctx, next) => {
 	// Need the router to be able to use named routes for redirecting
 	const postRoutes = require('./routes.js');
 
-	Post.delete(this.params.id);
+	Post.delete(ctx.params.id);
 
-	this.redirect(postRoutes.url('index'));
+	ctx.redirect(postRoutes.url('index'));
 };

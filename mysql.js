@@ -11,7 +11,7 @@ const dev_config = {
 
 global.connectionPool = mysql.createPool(dev_config);
 
-export function buildSelectQueryString(db, options) {
+function buildSelectQueryString(db, options) {
 	const fields = handleFields(db, options);
 	
 	const table = '`' + db.table + '`';
@@ -116,3 +116,5 @@ function handleOrderBy(db, options) {
 
 	return 'ORDER BY ' + orderBy.join(', ') + ' ';
 }
+
+module.exports = buildSelectQueryString;

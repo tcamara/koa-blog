@@ -1,6 +1,6 @@
 const koa = require('koa');
 const handlebars = require('koa-handlebars');
-const app = module.exports = koa();
+const app = module.exports = new koa();
 
 // Initialize handlebars for templating
 app.use(handlebars({
@@ -58,4 +58,4 @@ app.use(handlebars({
 }));
 
 // Add in routes for this subapp
-app.use(require('./routes.js').middleware());
+app.use(require('./routes.js').routes());

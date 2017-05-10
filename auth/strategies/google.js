@@ -9,6 +9,7 @@ passport.use(new GoogleStrategy({
 	},
 	function(token, tokenSecret, profile, done) {
 		const user = UserModel.getByField('googleId', profile.id);
+		console.log(user);
 
 		if (user) {
 			done(null, user);

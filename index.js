@@ -8,11 +8,10 @@ const mount = require('koa-mount');
 const serve = require('koa-static');
 const mysql = require('./mysql');
 const Setting = require('./models/setting.js');
-
 const passport = require('./auth/auth.js');
-const session = require('koa-generic-session');
+const session = require('koa-session-minimal');
 
-const app = koa();
+const app = new koa();
 
 app.keys = [process.env.SESSION_SECRET];
 app.use(session());
@@ -21,54 +20,54 @@ app.use(session());
 global.appRoot = path.resolve(__dirname);
 global.webRoot = path.join(appRoot, '/public');
 
-// Logger
+// // Logger
 app.use(logger());
 
 // x-response-time
-app.use(function *(next) {
-	const start = new Date;
-	yield next;
-	const ms = new Date - start;
-	this.set('X-Response-Time', ms + 'ms');
+app.use(async (ctx, next) => {
+	const start = new Date();
+	await next();
+	const ms = new Date() - start;
+	ctx.set('X-Response-Time', ms + 'ms');
 });
 
-// Serve static assets
+// // Serve static assets
 app.use(serve('./public'));
 
 // Load up the Setting table into a global object
-app.use(function *(next) {
-	const settings = yield Setting.getAll();
+app.use(async (ctx, next) => {
+	const settings = await Setting.getAll();
 	global.settings = {};
 
 	for(let setting of settings) {
 		global.settings[setting.key] = setting.value;
 	}
 
-	yield next;
+	await next();
 });
 
 // Top-Level Error Handling
-app.use(function *(next) {
+app.use(async (ctx, next) => {
 	try {
-		yield next;
+		await next();
 	}
 	catch(err) {
-		this.status = err.status || 500;
-		this.body = err.message;
-		this.app.emit('error', err, this);
+		ctx.status = err.status || 500;
+		ctx.body = err.message;
+		ctx.app.emit('error', err, ctx);
 	}
 });
 
 // Include each sub-application
 const wwwApp = require('./apps/www/index.js');
-const apiApp = require('./apps/api/index.js');
+// const apiApp = require('./apps/api/index.js');
 
 // Set up authentication and session handling
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Use koa-mount to mount each sub-application on its own path
-app.use(mount('/api', apiApp));
+// app.use(mount('/api', apiApp));
 app.use(mount('/', wwwApp));
 
 // Start up the server on the .env specified port

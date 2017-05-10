@@ -6,44 +6,44 @@ const PostTagModel = require('./../../../models/postTag.js');
 
 let tagRoutes = null;
 
-tagHandler.index = function*() {
-	const query = this.request.query;
-	const tags = yield TagModel.getFormatted({
+tagHandler.index = async (ctx, next) => {
+	const query = ctx.request.query;
+	const tags = await TagModel.getFormatted({
 		page: query.page, 
 		sort: query.sort, 
 		query: query.q,
 		fields: query.fields,
 	});
 
-	yield this.render('tags/list', {
+	await ctx.render('tags/list', {
 		title: 'Tags',
 		tags,
 	});
 };
 
-tagHandler.new = function*() {
-	yield this.render('tags/new', {
+tagHandler.new = async (ctx, next) => {
+	await ctx.render('tags/new', {
 		title: 'New Tag',
 		action: _getTagRoute('create')
 	});
 };
 
-tagHandler.create = function*() {
-	const newTagId = yield TagModel.create(this.request.body.name);
+tagHandler.create = async (ctx, next) => {
+	const newTagId = await TagModel.create(ctx.request.body.name);
 
-	this.redirect(_getTagRoute('show', newTagId));
+	ctx.redirect(_getTagRoute('show', newTagId));
 };
 
-tagHandler.show = function*() {
-	const tag = yield TagModel.getOneFormatted(this.params.tagId);
+tagHandler.show = async (ctx, next) => {
+	const tag = await TagModel.getOneFormatted(ctx.params.tagId);
 
 	if (tag != null) {
-		const postIds = yield PostTagModel.getPostIdsByTag(tag.id);
+		const postIds = await PostTagModel.getPostIdsByTag(tag.id);
 		let posts = null;
 
 		if (postIds.length) {
-			const query = this.request.query;
-			posts = yield PostModel.getFormatted({
+			const query = ctx.request.query;
+			posts = await PostModel.getFormatted({
 				page: query.page, 
 				sort: query.sort, 
 				customWhere: '`id` IN (' + postIds.join() + ')',
@@ -51,28 +51,28 @@ tagHandler.show = function*() {
 			});
 		}
 
-		yield this.render('posts/list', {
+		await ctx.render('posts/list', {
 			title: posts ? ('Posts Tagged ' + tag.name) : 'No Posts Found',
 			posts,
 		});
 	}
 	else {
-		yield this.render('tags/notFound', {
+		await ctx.render('tags/notFound', {
 			title: 'Tag Not Found',
 		});
 	}
 };
 
-tagHandler.update = function*() {
-	TagModel.update(this.params.tagId, this.params.name);
+tagHandler.update = async (ctx, next) => {
+	TagModel.update(ctx.params.tagId, ctx.params.name);
 
-	this.redirect(_getTagRoute('show', this.params.tagId));
+	ctx.redirect(_getTagRoute('show', ctx.params.tagId));
 };
 
-tagHandler.delete = function*() {
-	TagModel.delete(this.params.tagId);
+tagHandler.delete = async (ctx, next) => {
+	TagModel.delete(ctx.params.tagId);
 
-	this.redirect(_getTagRoute('index'));
+	ctx.redirect(_getTagRoute('index'));
 };
 
 function _getTagRoute(...args) {

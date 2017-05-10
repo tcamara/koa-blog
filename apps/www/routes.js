@@ -6,10 +6,10 @@ const userRouter = require('./users/routes.js');
 const tagRouter = require('./tags/routes.js');
 const pageRouter = require('./pages/routes.js');
 
-router.use('/posts', postRouter.routes(), postRouter.allowedMethods());
-router.use('/users', userRouter.routes(), userRouter.allowedMethods());
-router.use('/tags', tagRouter.routes(), tagRouter.allowedMethods());
-router.use('/pages', pageRouter.routes(), pageRouter.allowedMethods());
-router.use(generalRouter.routes(), generalRouter.allowedMethods());
+router.use('/posts', postRouter.routes());
+router.use('/users', userRouter.routes());
+router.use('/tags', tagRouter.routes());
+router.use('/pages', pageRouter.routes());
+router.use(generalRouter.routes());
 
 module.exports = router;

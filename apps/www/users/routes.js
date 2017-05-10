@@ -1,11 +1,8 @@
-const Router = require('koa-router');
+const userRouter = require('koa-router')();
+const userHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
 	multipart: true
 });
-
-const userRouter = new Router();
-
-const userHandler = require('./handlers.js');
 
 // Show user list
 userRouter.get('index', '/', userHandler.index);

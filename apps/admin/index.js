@@ -2,7 +2,7 @@ const koa = require('koa');
 const logger = require('koa-logger');
 const route = require('koa-router');
 const Pug = require('koa-pug');
-const app = module.exports = koa();
+const app = module.exports = new koa();
 
 // Initialize pug for templating
 const pug = new Pug({

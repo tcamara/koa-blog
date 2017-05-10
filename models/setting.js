@@ -1,9 +1,9 @@
 const Setting = module.exports = {};
 
-Setting.getOne = function*(key) {
+Setting.getOne = async function(key) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, key);
 	        connection.release();
@@ -15,10 +15,10 @@ Setting.getOne = function*(key) {
 	    });
 }
 
-Setting.get = function*(keys) {
+Setting.get = async function(keys) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` IN (' + keys.join() + ')';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -30,10 +30,10 @@ Setting.get = function*(keys) {
 	    });
 }
 
-Setting.getAll = function*() {
+Setting.getAll = async function() {
 	const queryString = 'SELECT * FROM `Setting`';
 
-	return yield global.connectionPool.getConnection()
+	return global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -45,10 +45,10 @@ Setting.getAll = function*() {
 	    });
 }
 
-Setting.create = function*(key, value) {
+Setting.create = async function(key, value) {
 	const queryString = 'INSERT INTO `Setting` (`key`, `value`) VALUES (?, ?)';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [key, value]);
 	        connection.release();
@@ -60,10 +60,10 @@ Setting.create = function*(key, value) {
 	    });
 }
 
-Setting.update = function*(key, value) {
+Setting.update = async function(key, value) {
 	const queryString = 'UPDATE `Setting` SET `value` = ? WHERE `key` = ?';
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [value, key]);
 	        connection.release();
@@ -73,10 +73,10 @@ Setting.update = function*(key, value) {
 	    });
 }
 
-Setting.delete = function*(key) {
+Setting.delete = async function(key) {
 	const queryString = 'DELETE FROM `Setting` WHERE `key` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, key);
 	        connection.release();
