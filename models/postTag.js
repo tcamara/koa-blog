@@ -6,10 +6,10 @@ const validSortColumns = {
 	'tadId': 1,
 };
 
-PostTag.exists = function*(postId, tagId) {
+PostTag.exists = async (postId, tagId) => {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? && tagId = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [postId, tagId]);
 	        connection.release();
@@ -21,11 +21,11 @@ PostTag.exists = function*(postId, tagId) {
 	    });
 }
 
-PostTag.getByPost = function*(postId, page = 0) {
+PostTag.getByPost = async (postId, page = 0) => {
 	const offset = page * postTagsPerPage;
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? LIMIT ? OFFSET ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [postId, postTagsPerPage, offset]);
 	        connection.release();
@@ -37,8 +37,8 @@ PostTag.getByPost = function*(postId, page = 0) {
 	    });
 }
 
-PostTag.getPostIdsByTag = function*(tagId, page = 0) {
-	const postTags = yield PostTag.getByTag(tagId, page);
+PostTag.getPostIdsByTag = async (tagId, page = 0) => {
+	const postTags = await PostTag.getByTag(tagId, page);
 
 	const posts = [];
 
@@ -49,11 +49,11 @@ PostTag.getPostIdsByTag = function*(tagId, page = 0) {
 	return posts;
 }
 
-PostTag.getByTag = function*(tagId, page) {
+PostTag.getByTag = async (tagId, page) => {
 	const offset = page * postTagsPerPage;
 	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` = ? LIMIT ? OFFSET ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [tagId, postTagsPerPage, offset]);
 	        connection.release();
@@ -65,10 +65,10 @@ PostTag.getByTag = function*(tagId, page) {
 	    });
 }
 
-PostTag.getByPosts = function*(postIds) {
+PostTag.getByPosts = async (postIds) => {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` IN (' + postIds.join() + ')';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -80,10 +80,10 @@ PostTag.getByPosts = function*(postIds) {
 	    });
 }
 
-PostTag.getByTags = function*(tagIds) {
+PostTag.getByTags = async (tagIds) => {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` IN (' + tagIds.join() + ')';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -95,10 +95,10 @@ PostTag.getByTags = function*(tagIds) {
 	    });
 }
 
-PostTag.create = function*(postId, tagId) {
+PostTag.create = async (postId, tagId) => {
 	const queryString = 'INSERT INTO `PostTag` (`postId`, `tadId`) VALUES (?, ?)';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [postId, tagId]);
 	        connection.release();
@@ -110,10 +110,10 @@ PostTag.create = function*(postId, tagId) {
 	    });
 }
 
-PostTag.delete = function*(postId, tagId) {
+PostTag.delete = async (postId, tagId) => {
 	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ? && `tadId` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [postId, tagId]);
 	        connection.release();
@@ -123,10 +123,10 @@ PostTag.delete = function*(postId, tagId) {
 	    });
 }
 
-PostTag.deleteByPost = function*(postId) {
+PostTag.deleteByPost = async (postId) => {
 	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, postId);
 	        connection.release();
@@ -136,10 +136,10 @@ PostTag.deleteByPost = function*(postId) {
 	    });
 }
 
-PostTag.deleteByTag = function*(tagId) {
+PostTag.deleteByTag = async (tagId) => {
 	const queryString = 'DELETE FROM `PostTag` WHERE `tadId` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, tagId);
 	        connection.release();

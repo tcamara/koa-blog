@@ -1,0 +1,18 @@
+- Editorconfig
+- Eliminate all todos in code
+- User avatars
+- Figure out page options
+- Figure out menu configuration
+- Finish implementing pages
+- Homepage contents
+- User creation - local
+- User creation - google oauth
+- Wysiwyg post editor
+- Easy image/gallery handling?
+- Test error handling
+- Test suite?
+- Security hardening
+- Optimization
+- Design
+- Admin
+- API

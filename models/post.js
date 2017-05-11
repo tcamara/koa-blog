@@ -23,10 +23,10 @@ const db = {
 	}
 };
 
-Post.getOne = function*(postId) {
+Post.getOne = async (postId) => {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, postId);
 	        connection.release();
@@ -38,11 +38,11 @@ Post.getOne = function*(postId) {
 	    });
 }
 
-Post.getOneFormatted = function*(postId) {
-	const post = yield Post.getOne(postId);
+Post.getOneFormatted = async (postId) => {
+	const post = await Post.getOne(postId);
 
 	if(post) {
-		return yield formatPost(post);
+		return await formatPost(post);
 	}
 	else {
 		return null;
@@ -50,10 +50,10 @@ Post.getOneFormatted = function*(postId) {
 }
 
 // Imposes no 'pagination' limits, for internal use only
-Post._getLimitless = function*(postIds) {
+Post._getLimitless = async (postIds) => {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` IN (' + postIds.join() + ')';
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -65,7 +65,7 @@ Post._getLimitless = function*(postIds) {
 	    });
 }
 
-Post.get = function*(params) {
+Post.get = async (params) => {
 	const options = {
 		page: params.page || 0,
 		sort: params.sort || '-id', 
@@ -77,7 +77,7 @@ Post.get = function*(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -89,33 +89,33 @@ Post.get = function*(params) {
 	    });
 }
 
-Post.getFormatted = function*(params) {
-	const unformattedPosts = yield Post.get(params);
+Post.getFormatted = async (params) => {
+	const unformattedPosts = await Post.get(params);
 
 	if(unformattedPosts.length) {
-		return yield formatPosts(unformattedPosts);
+		return await formatPosts(unformattedPosts);
 	}
 	else {
 		return [];
 	}
 }
 
-function* formatPost(post) {
-	const formattedPosts = yield formatPosts([post]);
+async function formatPost(post) {
+	const formattedPosts = await formatPosts([post]);
 
 	return formattedPosts[0];
 }
 
 // Take post objects straight from the DB and transform them into a view-ready format
-function* formatPosts(posts) {
+async function formatPosts(posts) {
 	// Need the router to be able to use named routes for links
 	const postRoutes = require('./../apps/www/posts/routes.js');
 
 	// Get all the user data for users that are associated with our posts
-	const users = yield UserModel.getByPosts(posts);
+	const users = await UserModel.getByPosts(posts);
 
 	// Get all the tag data for tags that are associated with our posts
-	const tags = yield TagModel.getByPosts(posts);
+	const tags = await TagModel.getByPosts(posts);
 
 	// Do the actual formatting
 	for(let post of posts) {
@@ -135,15 +135,15 @@ function* formatPosts(posts) {
 	return posts;
 }
 
-Post.create = function*(title, authorId, content, image) {
+Post.create = async (title, authorId, content, image) => {
 	// Move uploaded image to correct storage location and return the permanent path
-	yield moveImage(image);
+	await moveImage(image);
 	
 	const slug = slugify(title);
 	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `authorId`, `timestamp`, `content`, `image`) VALUES (?, ?, ?, now(), ?, ?)';
 	const queryParams = [title, slug, authorId, content, image.name];
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
@@ -155,7 +155,7 @@ Post.create = function*(title, authorId, content, image) {
 	    });
 }
 
-function* moveImage(image) {
+async function moveImage(image) {
 	// If there is no image, just return
 	if(image.size === 0) {
 		return;
@@ -173,12 +173,12 @@ function* moveImage(image) {
 	})
 }
 
-Post.update = function*(postId, title, authorId, content) {
+Post.update = async (postId, title, authorId, content) => {
 	const slug = slugify(title);
 	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `content` = ? WHERE `id` = ?';
 	const queryParams = [title, slug, authorId, content, postId];
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
@@ -188,10 +188,10 @@ Post.update = function*(postId, title, authorId, content) {
 	    });
 }
 
-Post.delete = function*(postId) {
+Post.delete = async (postId) => {
 	const queryString = 'DELETE FROM `Post` WHERE `id` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, postId);
 	        connection.release();

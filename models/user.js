@@ -17,20 +17,20 @@ const db = {
 	}
 };
 
-User.getOne = function*(userId) {
+User.getOne = async (userId) => {
 	const queryString = 'SELECT * FROM `User` WHERE `id` = ?';
 
-	return yield _rawGet(queryString, userId);
+	return await _rawGet(queryString, userId);
 }
 
-User.getByField = function*(fieldName, fieldValue) {
+User.getByField = async (fieldName, fieldValue) => {
 	const queryString = 'SELECT * FROM `User` WHERE `' + fieldName + '` = ?';
 
-	return yield _rawGet(queryString, fieldValue);
+	return await _rawGet(queryString, fieldValue);
 }
 
-function* _rawGet(queryString, value) {
-	return yield global.connectionPool.getConnection()
+async function _rawGet(queryString, value) {
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, value);
 	        connection.release();
@@ -42,11 +42,11 @@ function* _rawGet(queryString, value) {
 	    });
 }
 
-User.getOneFormatted = function*(userId) {
-	const user = yield User.getOne(userId);
+User.getOneFormatted = async (userId) => {
+	const user = await User.getOne(userId);
 
 	if(user) {
-		return yield formatUser(user);
+		return formatUser(user);
 	}
 	else {
 		return null;
@@ -54,10 +54,10 @@ User.getOneFormatted = function*(userId) {
 }
 
 // Imposes no 'pagination' limits, for internal use only
-User._getLimitless = function*(userIds) {
+User._getLimitless = async (userIds) => {
 	const queryString = 'SELECT * FROM `User` WHERE `id` IN (' + userIds.join() + ')';
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -69,7 +69,7 @@ User._getLimitless = function*(userIds) {
 	    });
 }
 
-User.get = function*(params) {
+User.get = async (params) => {
 	const options = {
 		page: params.page || 0,
 		sort: params.sort || '-id', 
@@ -80,7 +80,7 @@ User.get = function*(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -92,25 +92,25 @@ User.get = function*(params) {
 	    });
 }
 
-User.getFormatted = function*(params) {
-	const unformattedUsers = yield User.get(params);
+User.getFormatted = async (params) => {
+	const unformattedUsers = await User.get(params);
 
 	if(unformattedUsers.length) {
-		return yield formatUsers(unformattedUsers);
+		return formatUsers(unformattedUsers);
 	}
 	else {
 		return [];
 	}
 }
 
-function* formatUser(user) {
-	const formattedUsers = yield formatUsers([user]);
+function formatUser(user) {
+	const formattedUsers = formatUsers([user]);
 
 	return formattedUsers[0];
 }
 
 // Take post objects straight from the DB and transform them into a view-ready format
-function* formatUsers(users) {
+function formatUsers(users) {
 	// Need the router to be able to use named routes for links
 	const userRoutes = require('./../apps/www/users/routes.js');
 
@@ -123,7 +123,7 @@ function* formatUsers(users) {
 	return users;
 }
 
-User.getByPosts = function*(posts) {
+User.getByPosts = async (posts) => {
 	// Need the router to be able to use named routes for links
 	const userRoutes = require('./../apps/www/users/routes.js');
 
@@ -133,7 +133,7 @@ User.getByPosts = function*(posts) {
 	}
 
 	// Get the author data for our posts
-	const users = yield User._getLimitless(Object.keys(authorIds));
+	const users = await User._getLimitless(Object.keys(authorIds));
 
 	// Assign user to authorId in hash
 	for(let user of users) {
@@ -144,12 +144,12 @@ User.getByPosts = function*(posts) {
 	return authorIds;
 }
 
-User.create = function*(name, email, password, bio) {
+User.create = async (name, email, password, bio) => {
 	const slug = slugify(name);
 	const queryString = 'INSERT INTO `User` (`name`, `slug`, `email`, `password`, `bio`) VALUES (?, ?, ?, ?, ?)';
 	const queryParams = [name, slug, email, password, bio];
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
@@ -161,12 +161,12 @@ User.create = function*(name, email, password, bio) {
 	    });
 }
 
-User.update = function*(userId, name, email, password, bio) {
+User.update = async (userId, name, email, password, bio) => {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `User` SET `name` = ?, `slug` = ?, `email` = ?, `password` = ?, `bio` = ?, WHERE `id` = ?';
 	const queryParams = [name, slug, email, password, bio, userId];
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, queryParams);
 	        connection.release();
@@ -176,10 +176,10 @@ User.update = function*(userId, name, email, password, bio) {
 	    });
 }
 
-User.delete = function*(userId) {
+User.delete = async (userId) => {
 	const queryString = 'DELETE FROM `User` WHERE `id` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, userId);
 	        connection.release();

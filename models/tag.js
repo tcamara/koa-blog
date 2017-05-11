@@ -15,10 +15,10 @@ const db = {
 	}
 };
 
-Tag.getOne = function*(tagId) {
+Tag.getOne = async (tagId) => {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, tagId);
 	        connection.release();
@@ -30,11 +30,11 @@ Tag.getOne = function*(tagId) {
 	    });
 }
 
-Tag.getOneFormatted = function*(tagId) {
-	const unformattedTag = yield Tag.getOne(tagId);
+Tag.getOneFormatted = async (tagId) => {
+	const unformattedTag = await Tag.getOne(tagId);
 
 	if(unformattedTag) {
-		return yield formatTag(unformattedTag);
+		return formatTag(unformattedTag);
 	}
 	else {
 		return null;
@@ -42,10 +42,10 @@ Tag.getOneFormatted = function*(tagId) {
 }
 
 // Imposes no 'pagination' limits, for internal use only
-Tag._getLimitless = function*(tagIds) {
+Tag._getLimitless = async (tagIds) => {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -57,7 +57,7 @@ Tag._getLimitless = function*(tagIds) {
 	    });
 }
 
-Tag.get = function*(params) {
+Tag.get = async (params) => {
 	const options = {
 		page: params.page || 0,
 		sort: params.sort || '-id', 
@@ -68,7 +68,7 @@ Tag.get = function*(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString);
 	        connection.release();
@@ -80,25 +80,25 @@ Tag.get = function*(params) {
 	    });
 }
 
-Tag.getFormatted = function*(params) {
-	const unformattedTags = yield Tag.get(params);
+Tag.getFormatted = async (params) => {
+	const unformattedTags = await Tag.get(params);
 
 	if(unformattedTags.length) {
-		return yield formatTags(unformattedTags);
+		return formatTags(unformattedTags);
 	}
 	else {
 		return [];
 	}
 }
 
-function* formatTag(tag) {
-	const formattedTags = yield formatTags([tag]);
+function formatTag(tag) {
+	const formattedTags = formatTags([tag]);
 
 	return formattedTags[0];
 }
 
 // Take tag objects straight from the DB and transform them into a view-ready format
-function* formatTags(tags) {
+function formatTags(tags) {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./../apps/www/tags/routes.js');
 
@@ -111,7 +111,7 @@ function* formatTags(tags) {
 	return tags;
 }
 
-Tag.getByPosts = function*(posts) {
+Tag.getByPosts = async (posts) => {
 	// Need the router to be able to use named routes for links
 	const tagRoutes = require('./../apps/www/tags/routes.js');
 
@@ -122,7 +122,7 @@ Tag.getByPosts = function*(posts) {
 	}
 
 	// Get all the tag IDs that are associated with our posts
-	const postTags = yield PostTagModel.getByPosts(Object.keys(postIds));
+	const postTags = await PostTagModel.getByPosts(Object.keys(postIds));
 
 	// Grab all the tag IDs
 	const tagIds = {};
@@ -136,7 +136,7 @@ Tag.getByPosts = function*(posts) {
 	}
 
 	// Get the tag data for all tags associated with our posts
-	const tagList = yield Tag._getLimitless(Object.keys(tagIds));
+	const tagList = await Tag._getLimitless(Object.keys(tagIds));
 
 	// Assign tag to tagId in hash
 	for(let tag of tagList) {
@@ -155,11 +155,11 @@ Tag.getByPosts = function*(posts) {
 	return postIds;
 }
 
-Tag.create = function*(name) {
+Tag.create = async (name) => {
 	const slug = slugify(name);
 	const queryString = 'INSERT INTO `Tag` (`name`, `slug`) VALUES (?, ?)';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [name, slug]);
 	        connection.release();
@@ -171,11 +171,11 @@ Tag.create = function*(name) {
 	    });
 }
 
-Tag.update = function*(tagId, name) {
+Tag.update = async (tagId, name) => {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `Tag` SET `name` = ?, `slug` = ? WHERE `id` = ?';
 	
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, [name, slug, tagId]);
 	        connection.release();
@@ -185,10 +185,10 @@ Tag.update = function*(tagId, name) {
 	    });
 }
 
-Tag.delete = function*(tagId) {
+Tag.delete = async (tagId) => {
 	const queryString = 'DELETE FROM `Tag` WHERE `id` = ?';
 
-	return yield global.connectionPool.getConnection()
+	return await global.connectionPool.getConnection()
 	    .then((connection) => {
 	        const queryResult = connection.query(queryString, tagId);
 	        connection.release();

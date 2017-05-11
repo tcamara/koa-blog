@@ -1,111 +1,91 @@
 const pageHandler = module.exports = {};
 
-// Set up post model
-const Post = require('./../../../models/post.js');
+const PostModel = require('./../../../models/post.js');
+const PostTagModel = require('./../../../models/postTag.js');
+
+let pageRoutes = null;
 
 pageHandler.index = async (ctx, next) => {
-	// Need the router to be able to use named routes for links
-	const postRoutes = require('./routes.js');
-
-	const postResults = await Post.list(
-		ctx.request.query.page, 
-		ctx.request.query.sort, 
-		ctx.request.query.q
-	);
-
-	const posts = [];
-	for(let i = 0; i < postResults.length; i++) {
-		const postLink = postRoutes.url('show', postResults[i].id, postResults[i].slug);
-
-		posts.push({
-			id: postResults[i].id,
-			title: postResults[i].title,
-			slug: postResults[i].slug,
-			user: postResults[i].author,
-			timestamp: postResults[i].timestamp,
-			editTimestamp: postResults[i].editTimestamp,
-			content: postResults[i].content,
-			href: postLink,
-		});
-	}
+	const query = ctx.request.query;
+	const pages = await PostModel.getFormatted({
+		page: query.page, 
+		sort: query.sort, 
+		query: query.q,
+		fields: query.fields,
+	});
 
 	await ctx.render('posts/list', {
-		title: 'Posts',
-		header: 'Posts',
-		posts,
+		title: 'Pages',
+		pages,
 	});
 };
 
 pageHandler.new = async (ctx, next) => {
-	// Need the router to be able to use named routes for the form action
-	const postRoutes = require('./routes.js');
-
 	await ctx.render('posts/new', {
-		title: 'New Post',
-		header: 'New Post',
-		content: 'testing',
-		action: postRoutes.url('create')
+		title: 'New Page',
+		action: _getPageRoute('create'),
+		hasEditor: true,
 	});
 };
 
 pageHandler.create = async (ctx, next) => {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
-
 	const params = ctx.request.body;
+	const author = ctx.req.user.id;
 
-	// TODO: base this on current user
-	const author = 1;
-	const newPostId = await Post.create(params.title, author, params.content);
+	const newPageId = await PostModel.create(
+		params.fields.title, 
+		author, 
+		params.fields.content, 
+		params.files.image
+	);
 
-	ctx.redirect(postRoutes.url('show', newPostId));
+	ctx.redirect(_getPageRoute('show', newPageId));
 };
 
 pageHandler.show = async (ctx, next) => {
-	// Need the router to be able to use named routes for links
-	const postRoutes = require('./routes.js');
+	const page = await PostModel.getOneFormatted(ctx.params.pageId);
 
-	const post = await Post.get(ctx.params.id);
-
-	if(typeof post != 'undefined') {
-		await ctx.render('posts/show', {
-			header: post.title,
-			id: post.id,
-			title: post.title,
-			slug: post.slug,
-			user: post.author,
-			timestamp: post.timestamp,
-			editTimestamp: post.editTimestamp,
-			content: post.content,
-			href: postRoutes.url('show', post.id, post.slug),
-		});
-	}
-	else { // the requested post is not defined, display the not found page
-		await ctx.render('posts/notFound', {
-			header: 'Post Not Found',
-		});
-	}
+	await ctx.render('posts/show', {
+		title: page ? page.title : 'Page Not Found',
+		page,
+	});
 };
 
 pageHandler.update = async (ctx, next) => {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
-
-	Post.update(
-		ctx.params.id, 
+	PostModel.update(
+		ctx.params.pageId, 
 		ctx.params.title, 
 		ctx.params.author, 
 		ctx.params.content
 	);
 
-	ctx.redirect(postRoutes.url('show', ctx.params.id));
+	ctx.redirect(_getPageRoute('show', ctx.params.pageId));
 };
 
 pageHandler.delete = async (ctx, next) => {
-	// Need the router to be able to use named routes for redirecting
-	const postRoutes = require('./routes.js');
+	PostModel.delete(ctx.params.pageId);
 
-	Post.delete(ctx.params.id);
-
-	ctx.redirect(postRoutes.url('index'));
+	ctx.redirect(_getPageRoute('index'));
 };
+
+pageHandler.addTag = async (ctx, next) => {
+	PostTagModel.create(
+		ctx.params.pageId,
+		ctx.params.tagId
+	);
+};
+
+pageHandler.removeTag = async (ctx, next) => {
+	PostTagModel.delete(
+		ctx.params.pageId,
+		ctx.params.tagId
+	);
+};
+
+function _getPageRoute(...args) {
+	if (pageRoutes === null) {
+		pageRoutes = require('./routes.js');
+	}
+
+	return pageRoutes.url(...args);
+}

@@ -8,15 +8,13 @@ passport.use(new GoogleStrategy({
 		callbackURL: process.env.OAUTH_GOOGLE_CALLBACK_URL,
 	},
 	function(token, tokenSecret, profile, done) {
-		const user = UserModel.getByField('googleId', profile.id);
-		console.log(user);
-
-		if (user) {
-			done(null, user);
-		}
-		else {
-			done(null, false);
-		}
+		console.log(profile);
+		UserModel.getByField('googleId', profile.id)
+			.then((user) => {
+				done(null, user);
+			}).catch(() => {
+				done(null, false);
+			});
 	}
 ));
 

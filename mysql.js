@@ -117,4 +117,6 @@ function handleOrderBy(db, options) {
 	return 'ORDER BY ' + orderBy.join(', ') + ' ';
 }
 
-module.exports = buildSelectQueryString;
+module.exports = { 
+	buildSelectQueryString: buildSelectQueryString
+};

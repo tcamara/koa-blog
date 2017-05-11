@@ -1,6 +1,6 @@
 const Setting = module.exports = {};
 
-Setting.getOne = async function(key) {
+Setting.getOne = async (key) => {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` = ?';
 
 	return await global.connectionPool.getConnection()
@@ -15,7 +15,7 @@ Setting.getOne = async function(key) {
 	    });
 }
 
-Setting.get = async function(keys) {
+Setting.get = async (keys) => {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` IN (' + keys.join() + ')';
 
 	return await global.connectionPool.getConnection()
@@ -30,7 +30,7 @@ Setting.get = async function(keys) {
 	    });
 }
 
-Setting.getAll = async function() {
+Setting.getAll = async () => {
 	const queryString = 'SELECT * FROM `Setting`';
 
 	return global.connectionPool.getConnection()
@@ -45,7 +45,7 @@ Setting.getAll = async function() {
 	    });
 }
 
-Setting.create = async function(key, value) {
+Setting.create = async (key, value) => {
 	const queryString = 'INSERT INTO `Setting` (`key`, `value`) VALUES (?, ?)';
 
 	return await global.connectionPool.getConnection()
@@ -60,7 +60,7 @@ Setting.create = async function(key, value) {
 	    });
 }
 
-Setting.update = async function(key, value) {
+Setting.update = async (key, value) => {
 	const queryString = 'UPDATE `Setting` SET `value` = ? WHERE `key` = ?';
 	
 	return await global.connectionPool.getConnection()
@@ -73,7 +73,7 @@ Setting.update = async function(key, value) {
 	    });
 }
 
-Setting.delete = async function(key) {
+Setting.delete = async (key) => {
 	const queryString = 'DELETE FROM `Setting` WHERE `key` = ?';
 
 	return await global.connectionPool.getConnection()

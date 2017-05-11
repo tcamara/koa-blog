@@ -78,8 +78,8 @@ GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 | GET /pages/new         | Admin       | show create page page  |
 | POST /pages            | Admin       | create page submission |
 | GET /:page             | Guest       | show page              |
-| POST /:page            | Admin       | update pages           |
-| DELETE /:page          | Admin       | delete pages           |
+| POST /:page            | Admin       | update page submission |
+| DELETE /:page          | Admin       | delete page submission |
 
 #### Query Parameters (for list routes only)
 

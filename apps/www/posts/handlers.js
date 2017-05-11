@@ -30,9 +30,8 @@ postHandler.new = async (ctx, next) => {
 
 postHandler.create = async (ctx, next) => {
 	const params = ctx.request.body;
+	const author = ctx.req.user.id;
 
-	// TODO: base this on current user
-	const author = 1;
 	const newPostId = await PostModel.create(
 		params.fields.title, 
 		author, 

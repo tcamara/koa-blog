@@ -4,14 +4,14 @@ const GoogleStrategy = require('./strategies/google');
 const UserModel = require('./../models/user.js');
 
 passport.serializeUser((user, done) => {
-	console.log(user);
 	done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-	const user = UserModel.getOne(id).next().value;
-
-	done(null, user);
+	UserModel.getOne(id)
+		.then((user) => {
+			done(null, user);
+		});
 });
 
 module.exports = passport;

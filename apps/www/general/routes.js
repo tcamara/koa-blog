@@ -4,30 +4,27 @@ const koaBody = require('koa-body')({
 	multipart: true
 });
 const passport = require('./../../../auth/auth.js');
-generalRouter.get('new', '/session', generalHandler.new);
-// Show home page
-generalRouter.get('index', '/', generalHandler.index);
+const loginUrl = '/session';
 
-// Show login page
+// TODO: CSRF tokens, especially for this step
+const authUsingGoogle = passport.authenticate('google', {
+	scope: ['openid profile email'],
+	failureRedirect: loginUrl,
+});
 
+const authUsingLocal = passport.authenticate('local', {
+	failureRedirect: loginUrl,
+});
 
-// login page submission
-generalRouter.get('create-google', '/session/google', koaBody, passport.authenticate('google', {
-	scope: ['profile'],
-	failureRedirect: '/session',
-}), generalHandler.create);
+const authGoogleCallback = passport.authenticate('google', { 
+	failureRedirect: loginUrl,
+});
 
-generalRouter.post('create', '/session', koaBody, passport.authenticate('local', {
-	failureRedirect: '/session',
-}), generalHandler.create);
-
-// login OAuth return page
-generalRouter.get('googleCallback', '/session/google-callback', koaBody, passport.authenticate('google', { 
-	failureRedirect: '/session'
-}),
-generalHandler.index);
-
-// logout page submission
+generalRouter.get('googleCallback', '/session/google-callback', koaBody, authGoogleCallback, generalHandler.index);
+generalRouter.get('createGoogle', '/session/google', koaBody, authUsingGoogle, generalHandler.create);
+generalRouter.get('new', loginUrl, generalHandler.new);
+generalRouter.post('create', '/session', koaBody, authUsingLocal, generalHandler.create);
 generalRouter.delete('delete', '/session', generalHandler.delete);
+generalRouter.get('index', '/', generalHandler.index);
 
 module.exports = generalRouter;
