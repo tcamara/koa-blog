@@ -1,41 +1,26 @@
-const mysql = require('mysql2/promise');
-
-// TODO: Move this out to a config file, dynamically load proper config file based on NODE_ENV
-const dev_config = {
-	host: process.env.DB_HOST,
-	database: process.env.DB_DATABASE,
-	user: process.env.DB_USER,
-	password: process.env.DB_PASSWORD,
-	connectionLimit: process.env.DB_CONNECTION_LIMIT,
-};
-
-global.connectionPool = mysql.createPool(dev_config);
-
 function buildSelectQueryString(db, options) {
-	const fields = handleFields(db, options);
-	
+	const fields = _handleFields(db, options);
+
 	const table = '`' + db.table + '`';
 
-	const where = handleWhere(db, options);
+	const where = _handleWhere(db, options);
 
-	const orderBy = handleOrderBy(db, options);
+	const orderBy = _handleOrderBy(db, options);
 
-	const limitAndOffset = handleLimitAndOffset(db, options);
-	
+	const limitAndOffset = _handleLimitAndOffset(db, options);
+
 	const queryString = `SELECT ${fields} FROM ${table} ${where}${orderBy}${limitAndOffset}`;
-
-	console.log(queryString);
 
 	return queryString;
 }
 
-function handleFields(db, options) {
+function _handleFields(db, options) {
 	let fields = '*';
-	
+
 	if(options.fields) {
 		// Turn the string into an array
 		options.fields = options.fields.split(',');
-		
+
 		// Strip out any invalid fields
 		fields = options.fields.filter(function(item) {
 			if(db.columns[item]) {
@@ -45,7 +30,7 @@ function handleFields(db, options) {
 				return false
 			}
 		// Properly format the fields
-		}).map(function(item) { 
+		}).map(function(item) {
 			return '`' + item + '`';
 		})
 		.join(', ');
@@ -56,7 +41,7 @@ function handleFields(db, options) {
 
 // TODO: split filter and query
 // TODO: handle filtering/querying with operators other than "="
-function handleWhere(db, options) {
+function _handleWhere(db, options) {
 	let where = '';
 
 	if(options.customWhere || options.filter) {
@@ -82,17 +67,17 @@ function handleWhere(db, options) {
 	return where;
 }
 
-function handleLimitAndOffset(db, options) {
+function _handleLimitAndOffset(db, options) {
 	const offset = options.page * db.pageSize;
 
 	return `LIMIT ${db.pageSize} OFFSET ${offset}`;
 }
 
-function handleOrderBy(db, options) {
+function _handleOrderBy(db, options) {
 	if(!options.sort) {
 		return '';
 	}
-		
+
 	const items = options.sort.split(',');
 	const orderBy = [];
 
@@ -107,7 +92,7 @@ function handleOrderBy(db, options) {
 
 		// Ensure that only columns we want to be sortable are accepted
 		if(db.columns[item].sortable) {
-			orderBy.push('`' + item + '`' + direction); 
+			orderBy.push('`' + item + '`' + direction);
 		}
 		else {
 			throw new Error('Error in parseSortParam: Invalid column for sorting');
@@ -117,6 +102,6 @@ function handleOrderBy(db, options) {
 	return 'ORDER BY ' + orderBy.join(', ') + ' ';
 }
 
-module.exports = { 
-	buildSelectQueryString: buildSelectQueryString
+module.exports = {
+	buildSelectQueryString,
 };

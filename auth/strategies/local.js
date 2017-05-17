@@ -7,7 +7,6 @@ passport.use(new localStrategy({
 }, (email, password, done) => {
 	UserModel.getByField('email', email)
 		.then((user) => {
-			console.log(user);
 			// TODO: plaintext password is probably not a good long term solution :\
 			if (email === user.email && password === user.password) {
 				done(null, user);

@@ -1,8 +1,7 @@
-const Tag = module.exports = {};
-
 const PostTagModel = require('./postTag.js');
-const mysql = require('./../mysql.js');
+const mysql = require('./../mysql/mysql.js');
 const slugify = require('./../utils/slugify.js');
+let tagRoutes = null;
 
 const db = {
 	'table': 'Tag',
@@ -15,52 +14,27 @@ const db = {
 	}
 };
 
-Tag.getOne = async (tagId) => {
+async function getOne(tagId) {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, tagId);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0][0];
-	    }).catch((err) => {
-	    	throw new Error('Error in Tag.getOne: ' + err.message);
-	    });
+	return await mysql.selectOne(queryString, tagId);
 }
 
-Tag.getOneFormatted = async (tagId) => {
-	const unformattedTag = await Tag.getOne(tagId);
+async function getOneFormatted(tagId) {
+	const unformattedTag = await getOne(tagId);
 
 	if(unformattedTag) {
-		return formatTag(unformattedTag);
+		return _formatTag(unformattedTag);
 	}
 	else {
 		return null;
 	}
 }
 
-// Imposes no 'pagination' limits, for internal use only
-Tag._getLimitless = async (tagIds) => {
-	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
-	
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	        throw new Error('Error in Tag._getLimitless: ' + err.message);
-	    });
-}
-
-Tag.get = async (params) => {
+async function get(params) {
 	const options = {
 		page: params.page || 0,
-		sort: params.sort || '-id', 
+		sort: params.sort || '-id',
 		filter: params.filter || null,
 		query: params.query || null,
 		fields: params.fields || null,
@@ -68,53 +42,21 @@ Tag.get = async (params) => {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	        throw new Error('Error in Tag.get: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString);
 }
 
-Tag.getFormatted = async (params) => {
-	const unformattedTags = await Tag.get(params);
+async function getFormatted(params) {
+	const unformattedTags = await get(params);
 
 	if(unformattedTags.length) {
-		return formatTags(unformattedTags);
+		return _formatTags(unformattedTags);
 	}
 	else {
 		return [];
 	}
 }
 
-function formatTag(tag) {
-	const formattedTags = formatTags([tag]);
-
-	return formattedTags[0];
-}
-
-// Take tag objects straight from the DB and transform them into a view-ready format
-function formatTags(tags) {
-	// Need the router to be able to use named routes for links
-	const tagRoutes = require('./../apps/www/tags/routes.js');
-
-	// Do the actual formatting
-	for(let tag of tags) {
-		// Handle links
-		tag.href = tagRoutes.url('show', tag.id, tag.slug);
-	}
-
-	return tags;
-}
-
-Tag.getByPosts = async (posts) => {
-	// Need the router to be able to use named routes for links
-	const tagRoutes = require('./../apps/www/tags/routes.js');
-
+async function getByPosts(posts) {
 	// Grab all the unique post IDs
 	const postIds = {};
 	for(let post of posts) {
@@ -136,11 +78,11 @@ Tag.getByPosts = async (posts) => {
 	}
 
 	// Get the tag data for all tags associated with our posts
-	const tagList = await Tag._getLimitless(Object.keys(tagIds));
+	const tagList = await _getLimitless(Object.keys(tagIds));
 
 	// Assign tag to tagId in hash
 	for(let tag of tagList) {
-		tag.link = tagRoutes.url('show', tag.id, tag.slug);
+		tag.link = _getTagRoute('show', tag.id, tag.slug);
 		tagIds[tag.id] = tag;
 	}
 
@@ -155,45 +97,65 @@ Tag.getByPosts = async (posts) => {
 	return postIds;
 }
 
-Tag.create = async (name) => {
+async function create(name) {
 	const slug = slugify(name);
 	const queryString = 'INSERT INTO `Tag` (`name`, `slug`) VALUES (?, ?)';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [name, slug]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-		    return result[0].insertId;
-	    }).catch((err) => {
-	        throw new Error('Error in Tag.create: ' + err.message);
-	    });
+	return await mysql.insert(queryString, [name, slug]);
 }
 
-Tag.update = async (tagId, name) => {
+async function update(tagId, name) {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `Tag` SET `name` = ?, `slug` = ? WHERE `id` = ?';
-	
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [name, slug, tagId]);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in Tag.update: ' + err.message);
-	    });
+
+	return await mysql.update(queryString, queryString, [name, slug, tagId]);
 }
 
-Tag.delete = async (tagId) => {
+async function remove(tagId) {
 	const queryString = 'DELETE FROM `Tag` WHERE `id` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, tagId);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in Tag.delete: ' + err.message);
-	    });
+	return await mysql.remove(queryString, tagId);
 }
+
+// Imposes no 'pagination' limits, for internal use only
+async function _getLimitless(tagIds) {
+	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
+
+	return await mysql.selectMany(queryString);
+}
+
+function _formatTag(tag) {
+	const formattedTags = _formatTags([tag]);
+
+	return formattedTags[0];
+}
+
+// Take tag objects straight from the DB and transform them into a view-ready format
+function _formatTags(tags) {
+	// Do the actual formatting
+	for(let tag of tags) {
+		// Handle links
+		tag.href = _getTagRoute('show', tag.id, tag.slug);
+	}
+
+	return tags;
+}
+
+function _getTagRoute(...args) {
+	if (tagRoutes === null) {
+		tagRoutes = require('./../apps/www/tags/routes.js');
+	}
+
+	return tagRoutes.url(...args);
+}
+
+module.exports = {
+	getOne,
+	getOneFormatted,
+	get,
+	getFormatted,
+	getByPosts,
+	create,
+	update,
+	remove,
+};

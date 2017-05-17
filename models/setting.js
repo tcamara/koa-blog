@@ -1,87 +1,46 @@
-const Setting = module.exports = {};
+const mysql = require('./../mysql/mysql.js');
 
-Setting.getOne = async (key) => {
+async function getOne(key) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, key);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0][0];
-	    }).catch((err) => {
-	    	throw new Error('Error in Setting.getOne: ' + err.message);
-	    });
+	return await mysql.selectOne(queryString, key);
 }
 
-Setting.get = async (keys) => {
+async function get(keys) {
 	const queryString = 'SELECT * FROM `Setting` WHERE `key` IN (' + keys.join() + ')';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	    	throw new Error('Error in Setting.get: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString);
 }
 
-Setting.getAll = async () => {
+async function getAll() {
 	const queryString = 'SELECT * FROM `Setting`';
 
-	return global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	        throw new Error('Error in Setting.getAll: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString);
 }
 
-Setting.create = async (key, value) => {
+async function create(key, value) {
 	const queryString = 'INSERT INTO `Setting` (`key`, `value`) VALUES (?, ?)';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [key, value]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-		    return result[0].insertId;
-	    }).catch((err) => {
-	        throw new Error('Error in Setting.create: ' + err.message);
-	    });
+	return await mysql.insert(queryString, [key, value]);
 }
 
-Setting.update = async (key, value) => {
+async function update(key, value) {
 	const queryString = 'UPDATE `Setting` SET `value` = ? WHERE `key` = ?';
-	
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [value, key]);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in Setting.update: ' + err.message);
-	    });
+
+	return await mysql.update(queryString, queryString, [value, key]);
 }
 
-Setting.delete = async (key) => {
+async function remove(key) {
 	const queryString = 'DELETE FROM `Setting` WHERE `key` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, key);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in Setting.delete: ' + err.message);
-	    });
+	return await mysql.remove(queryString, key);
 }
+
+module.exports = {
+	getOne,
+	get,
+	getAll,
+	create,
+	update,
+	remove,
+};

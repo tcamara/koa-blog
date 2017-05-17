@@ -1,15 +1,13 @@
-const userHandler = module.exports = {};
-
 const UserModel = require('./../../../models/user.js');
 
 let userRoutes = null;
 
-userHandler.index = async (ctx, next) => {
+async function indexAction(ctx, next) {
 	const query = ctx.request.query;
-	
+
 	const users = await UserModel.getFormatted({
-		page: query.page, 
-		sort: query.sort, 
+		page: query.page,
+		sort: query.sort,
 		query: query.q,
 		fields: query.fields,
 	});
@@ -20,14 +18,14 @@ userHandler.index = async (ctx, next) => {
 	});
 };
 
-userHandler.new = async (ctx, next) => {
+async function newAction(ctx, next) {
 	await ctx.render('users/new', {
 		title: 'New User',
 		action: _getUserRoute('create')
 	});
 };
 
-userHandler.create = async (ctx, next) => {
+async function createAction(ctx, next) {
 	const newUserId = await UserModel.create(
 		ctx.request.body.name,
 		ctx.request.body.email,
@@ -38,7 +36,7 @@ userHandler.create = async (ctx, next) => {
 	ctx.redirect(_getUserRoute('show', newUserId));
 };
 
-userHandler.show = async (ctx, next) => {
+async function showAction(ctx, next) {
 	const user = await UserModel.getOneFormatted(ctx.params.userId);
 
 	await ctx.render('users/show', {
@@ -47,9 +45,9 @@ userHandler.show = async (ctx, next) => {
 	});
 };
 
-userHandler.update = async (ctx, next) => {
+async function updateAction(ctx, next) {
 	UserModel.update(
-		ctx.params.userId, 
+		ctx.params.userId,
 		ctx.params.name,
 		ctx.params.email,
 		ctx.params.password,
@@ -59,8 +57,8 @@ userHandler.update = async (ctx, next) => {
 	ctx.redirect(_getUserRoute('show', ctx.params.userId));
 };
 
-userHandler.delete = async (ctx, next) => {
-	UserModel.delete(ctx.params.userId);
+async function deleteAction(ctx, next) {
+	UserModel.remove(ctx.params.userId);
 
 	ctx.redirect(_getUserRoute('index'));
 };
@@ -72,3 +70,12 @@ function _getUserRoute(...args) {
 
 	return userRoutes.url(...args);
 }
+
+module.exports = {
+	indexAction,
+	newAction,
+	createAction,
+	showAction,
+	updateAction,
+	deleteAction,
+};

@@ -1,44 +1,25 @@
-const PostTag = module.exports = {};
-
+const mysql = require('./../mysql/mysql.js');
 const postTagsPerPage = 5;
 const validSortColumns = {
 	'postId': 1,
 	'tadId': 1,
 };
 
-PostTag.exists = async (postId, tagId) => {
+async function exists(postId, tagId) {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? && tagId = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postId, tagId]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0][0];
-	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.exists: ' + err.message);
-	    });
+	return await mysql.selectOne(queryString, [postId, tagId]);
 }
 
-PostTag.getByPost = async (postId, page = 0) => {
+async function getByPost(postId, page = 0) {
 	const offset = page * postTagsPerPage;
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` = ? LIMIT ? OFFSET ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postId, postTagsPerPage, offset]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.getByPost: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString, [postId, postTagsPerPage, offset]);
 }
 
-PostTag.getPostIdsByTag = async (tagId, page = 0) => {
-	const postTags = await PostTag.getByTag(tagId, page);
+async function getPostIdsByTag(tagId, page = 0) {
+	const postTags = await getByTag(tagId, page);
 
 	const posts = [];
 
@@ -49,102 +30,58 @@ PostTag.getPostIdsByTag = async (tagId, page = 0) => {
 	return posts;
 }
 
-PostTag.getByTag = async (tagId, page) => {
+async function getByTag(tagId, page) {
 	const offset = page * postTagsPerPage;
 	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` = ? LIMIT ? OFFSET ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [tagId, postTagsPerPage, offset]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.getByTag: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString, [tagId, postTagsPerPage, offset]);
 }
 
-PostTag.getByPosts = async (postIds) => {
+async function getByPosts(postIds) {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `postId` IN (' + postIds.join() + ')';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.getByPosts: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString);
 }
 
-PostTag.getByTags = async (tagIds) => {
+async function getByTags(tagIds) {
 	const queryString = 'SELECT * FROM `PostTag` WHERE `tagId` IN (' + tagIds.join() + ')';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-	        return result[0];
-	    }).catch((err) => {
-	    	throw new Error('Error in PostTag.getByTags: ' + err.message);
-	    });
+	return await mysql.selectMany(queryString);
 }
 
-PostTag.create = async (postId, tagId) => {
+async function create(postId, tagId) {
 	const queryString = 'INSERT INTO `PostTag` (`postId`, `tadId`) VALUES (?, ?)';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postId, tagId]);
-	        connection.release();
-	        return queryResult;
-	    }).then((result) => {
-		    return result[0].insertId;
-	    }).catch((err) => {
-	        throw new Error('Error in PostTag.create: ' + err.message);
-	    });
+	return await mysql.insert(queryString, [postId, tagId]);
 }
 
-PostTag.delete = async (postId, tagId) => {
+async function remove(postId, tagId) {
 	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ? && `tadId` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, [postId, tagId]);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in PostTag.delete: ' + err.message);
-	    });
+	return await mysql.remove(queryString, [postId, tagId]);
 }
 
-PostTag.deleteByPost = async (postId) => {
+async function removeByPost(postId) {
 	const queryString = 'DELETE FROM `PostTag` WHERE `postId` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, postId);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in PostTag.deleteByPost: ' + err.message);
-	    });
+	return await mysql.remove(queryString, postId);
 }
 
-PostTag.deleteByTag = async (tagId) => {
+async function removeByTag(tagId) {
 	const queryString = 'DELETE FROM `PostTag` WHERE `tadId` = ?';
 
-	return await global.connectionPool.getConnection()
-	    .then((connection) => {
-	        const queryResult = connection.query(queryString, tagId);
-	        connection.release();
-	        return queryResult;
-	    }).catch((err) => {
-	        throw new Error('Error in PostTag.deleteByTag: ' + err.message);
-	    });
+	return await mysql.remove(queryString, tagId);
 }
+
+module.exports = {
+	exists,
+	getByPost,
+	getPostIdsByTag,
+	getByTag,
+	getByPosts,
+	getByTags,
+	create,
+	remove,
+	removeByTag,
+	removeByPost,
+};

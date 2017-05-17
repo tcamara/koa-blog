@@ -1,16 +1,14 @@
-const tagHandler = module.exports = {};
-
 const TagModel = require('./../../../models/tag.js');
 const PostModel = require('./../../../models/post.js');
 const PostTagModel = require('./../../../models/postTag.js');
 
 let tagRoutes = null;
 
-tagHandler.index = async (ctx, next) => {
+async function indexAction(ctx, next) {
 	const query = ctx.request.query;
 	const tags = await TagModel.getFormatted({
-		page: query.page, 
-		sort: query.sort, 
+		page: query.page,
+		sort: query.sort,
 		query: query.q,
 		fields: query.fields,
 	});
@@ -21,20 +19,20 @@ tagHandler.index = async (ctx, next) => {
 	});
 };
 
-tagHandler.new = async (ctx, next) => {
+async function newAction(ctx, next) {
 	await ctx.render('tags/new', {
 		title: 'New Tag',
 		action: _getTagRoute('create')
 	});
 };
 
-tagHandler.create = async (ctx, next) => {
+async function createAction(ctx, next) {
 	const newTagId = await TagModel.create(ctx.request.body.name);
 
 	ctx.redirect(_getTagRoute('show', newTagId));
 };
 
-tagHandler.show = async (ctx, next) => {
+async function showAction(ctx, next) {
 	const tag = await TagModel.getOneFormatted(ctx.params.tagId);
 
 	if (tag != null) {
@@ -44,8 +42,8 @@ tagHandler.show = async (ctx, next) => {
 		if (postIds.length) {
 			const query = ctx.request.query;
 			posts = await PostModel.getFormatted({
-				page: query.page, 
-				sort: query.sort, 
+				page: query.page,
+				sort: query.sort,
 				customWhere: '`id` IN (' + postIds.join() + ')',
 				fields: query.fields,
 			});
@@ -63,14 +61,14 @@ tagHandler.show = async (ctx, next) => {
 	}
 };
 
-tagHandler.update = async (ctx, next) => {
+async function updateAction(ctx, next) {
 	TagModel.update(ctx.params.tagId, ctx.params.name);
 
 	ctx.redirect(_getTagRoute('show', ctx.params.tagId));
 };
 
-tagHandler.delete = async (ctx, next) => {
-	TagModel.delete(ctx.params.tagId);
+async function deleteAction(ctx, next) {
+	TagModel.remove(ctx.params.tagId);
 
 	ctx.redirect(_getTagRoute('index'));
 };
@@ -82,3 +80,12 @@ function _getTagRoute(...args) {
 
 	return tagRoutes.url(...args);
 }
+
+module.exports = {
+	indexAction,
+	newAction,
+	createAction,
+	showAction,
+	updateAction,
+	deleteAction,
+};

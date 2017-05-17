@@ -6,7 +6,7 @@ const koa = require('koa');
 const logger = require('koa-logger');
 const mount = require('koa-mount');
 const serve = require('koa-static');
-const mysql = require('./mysql');
+const mysql = require('./mysql/mysql.js');
 const Setting = require('./models/setting.js');
 const passport = require('./auth/auth.js');
 const session = require('koa-session-minimal');
@@ -72,4 +72,4 @@ app.use(mount('/', wwwApp));
 
 // Start up the server on the .env specified port
 app.listen(process.env.APP_PORT);
-console.log('listening on port ' + process.env.APP_PORT);         
+console.log('listening on port ' + process.env.APP_PORT);

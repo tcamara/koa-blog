@@ -4,11 +4,11 @@ const koaBody = require('koa-body')({
 	multipart: true
 });
 
-pageRouter.get('new', '/new', pageHandler.new);
-pageRouter.get('show', '/:pageId', pageHandler.show);
-pageRouter.post('update', '/:pageId', pageHandler.update);
-pageRouter.delete('delete', '/:pageId', pageHandler.delete);
-pageRouter.get('index', '/', pageHandler.index);
-pageRouter.post('create', '/', pageHandler.create);
+pageRouter.get('new', '/new', pageHandler.newAction);
+pageRouter.get('show', '/:pageId', pageHandler.showAction);
+pageRouter.post('update', '/:pageId', pageHandler.updateAction);
+pageRouter.delete('delete', '/:pageId', pageHandler.deleteAction);
+pageRouter.get('index', '/', pageHandler.indexAction);
+pageRouter.post('create', '/', pageHandler.createAction);
 
 module.exports = pageRouter;

@@ -16,15 +16,15 @@ const authUsingLocal = passport.authenticate('local', {
 	failureRedirect: loginUrl,
 });
 
-const authGoogleCallback = passport.authenticate('google', { 
+const authGoogleCallback = passport.authenticate('google', {
 	failureRedirect: loginUrl,
 });
 
-generalRouter.get('googleCallback', '/session/google-callback', koaBody, authGoogleCallback, generalHandler.index);
-generalRouter.get('createGoogle', '/session/google', koaBody, authUsingGoogle, generalHandler.create);
-generalRouter.get('new', loginUrl, generalHandler.new);
-generalRouter.post('create', '/session', koaBody, authUsingLocal, generalHandler.create);
-generalRouter.delete('delete', '/session', generalHandler.delete);
-generalRouter.get('index', '/', generalHandler.index);
+generalRouter.get('googleCallback', '/session/google-callback', koaBody, authGoogleCallback, generalHandler.indexAction);
+generalRouter.get('createGoogle', '/session/google', koaBody, authUsingGoogle, generalHandler.createAction);
+generalRouter.get('new', loginUrl, generalHandler.newAction);
+generalRouter.post('create', '/session', koaBody, authUsingLocal, generalHandler.createAction);
+generalRouter.delete('delete', '/session', generalHandler.deleteAction);
+generalRouter.get('index', '/', generalHandler.indexAction);
 
 module.exports = generalRouter;

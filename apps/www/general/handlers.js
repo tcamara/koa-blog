@@ -1,15 +1,13 @@
-const generalHandler = module.exports = {};
-
 let generalRoutes = null;
 
-generalHandler.index = async (ctx, next) => {
+async function indexAction(ctx, next) {
 	await ctx.render('general/index', {
 		title: 'Index',
 		content: 'Index content',
 	});
 };
 
-generalHandler.new = async (ctx, next) => {
+async function newAction(ctx, next) {
 	await ctx.render('general/login', {
 		title: 'Login',
 		action: _getGeneralRoute('create'),
@@ -17,13 +15,14 @@ generalHandler.new = async (ctx, next) => {
 	});
 };
 
-generalHandler.create = async (ctx, next) => {
+async function createAction(ctx, next) {
 	const params = ctx.request.body;
-	
+
 	ctx.redirect(_getGeneralRoute('index'));
 };
 
-generalHandler.delete = async (ctx, next) => {
+async function deleteAction(ctx, next) {
+	ctx.request.logout();
 	ctx.redirect(_getGeneralRoute('index'));
 };
 
@@ -34,3 +33,10 @@ function _getGeneralRoute(...args) {
 
 	return generalRoutes.url(...args);
 }
+
+module.exports = {
+	indexAction,
+	newAction,
+	createAction,
+	deleteAction,
+};
