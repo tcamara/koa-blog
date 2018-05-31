@@ -1,31 +1,32 @@
 const mysql = require('./../mysql/mysql.js');
 const slugify = require('./../utils/slugify.js');
+
 let userRoutes = null;
 
 const db = {
-	'table': 'User',
-	'pageSize': 5,
-	'columns': {
-		'id': { 'sortable': 1, 'filterable': 1 },
-		'name': { 'sortable': 1, 'filterable': 1 },
-		'slug': { 'sortable': 1, 'filterable': 1 },
-		'email': { 'sortable': 1, 'filterable': 1 },
-		'password': { 'sortable': 0, 'filterable': 0 },
-		'numPosts': { 'sortable': 1, 'filterable': 1 },
-		'bio': { 'sortable': 0, 'filterable': 1 },
-	}
+	table: 'User',
+	pageSize: 5,
+	columns: {
+		id: { sortable: 1, filterable: 1 },
+		name: { sortable: 1, filterable: 1 },
+		slug: { sortable: 1, filterable: 1 },
+		email: { sortable: 1, filterable: 1 },
+		password: { sortable: 0, filterable: 0 },
+		numPosts: { sortable: 1, filterable: 1 },
+		bio: { sortable: 0, filterable: 1 },
+	},
 };
 
 async function getOne(userId) {
 	const queryString = 'SELECT * FROM `User` WHERE `id` = ?';
 
-	return await mysql.selectOne(queryString, userId);
+	return mysql.selectOne(queryString, userId);
 }
 
 async function getByField(fieldName, fieldValue) {
-	const queryString = 'SELECT * FROM `User` WHERE `' + fieldName + '` = ?';
+	const queryString = `SELECT * FROM \`User\` WHERE \`${fieldName}\` = ?`;
 
-	return await mysql.selectOne(queryString, fieldValue);
+	return mysql.selectOne(queryString, fieldValue);
 }
 
 async function get(params) {
@@ -39,34 +40,32 @@ async function get(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return await mysql.selectMany(queryString);
+	return mysql.selectMany(queryString);
 }
 
 async function getOneFormatted(userId) {
 	const user = await getOne(userId);
 
-	if(user) {
+	if (user) {
 		return _formatUser(user);
 	}
-	else {
-		return null;
-	}
+
+	return null;
 }
 
 async function getFormatted(params) {
 	const unformattedUsers = await get(params);
 
-	if(unformattedUsers.length) {
+	if (unformattedUsers.length) {
 		return _formatUsers(unformattedUsers);
 	}
-	else {
-		return [];
-	}
+
+	return [];
 }
 
 async function getByPosts(posts) {
 	const authorIds = {};
-	for(let post of posts) {
+	for (const post of posts) {
 		authorIds[post.authorId] = 1;
 	}
 
@@ -74,7 +73,7 @@ async function getByPosts(posts) {
 	const users = await _getLimitless(Object.keys(authorIds));
 
 	// Assign user to authorId in hash
-	for(let user of users) {
+	for (const user of users) {
 		user.link = _getUserRoute('show', user.id);
 		authorIds[user.id] = user;
 	}
@@ -87,7 +86,7 @@ async function create(name, email, password, bio) {
 	const queryString = 'INSERT INTO `User` (`name`, `slug`, `email`, `password`, `bio`) VALUES (?, ?, ?, ?, ?)';
 	const queryParams = [name, slug, email, password, bio];
 
-	return await mysql.insert(queryString, queryParams);
+	return mysql.insert(queryString, queryParams);
 }
 
 async function update(userId, name, email, password, bio) {
@@ -95,19 +94,19 @@ async function update(userId, name, email, password, bio) {
 	const queryString = 'UPDATE `User` SET `name` = ?, `slug` = ?, `email` = ?, `password` = ?, `bio` = ?, WHERE `id` = ?';
 	const queryParams = [name, slug, email, password, bio, userId];
 
-	return await mysql.update(queryString, queryParams);
+	return mysql.update(queryString, queryParams);
 }
 
 async function remove(userId) {
 	const queryString = 'DELETE FROM `User` WHERE `id` = ?';
 
-	return await mysql.remove(queryString, userId);
+	return mysql.remove(queryString, userId);
 }
 
 async function _getLimitless(userIds) {
-	const queryString = 'SELECT * FROM `User` WHERE `id` IN (' + userIds.join() + ')';
+	const queryString = `SELECT * FROM \`User\` WHERE \`id\` IN (${userIds.join()})`;
 
-	return await mysql.selectMany(queryString);
+	return mysql.selectMany(queryString);
 }
 
 function _formatUser(user) {
@@ -118,7 +117,7 @@ function _formatUser(user) {
 
 function _formatUsers(users) {
 	// Do the actual formatting
-	for(let user of users) {
+	for (const user of users) {
 		// Handle links
 		user.href = _getUserRoute('show', user.id, user.slug);
 	}

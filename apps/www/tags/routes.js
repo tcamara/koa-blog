@@ -1,7 +1,7 @@
 const tagRouter = require('koa-router')();
 const tagHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
-	multipart: true
+	multipart: true,
 });
 
 tagRouter.get('new', '/new', tagHandler.newAction);

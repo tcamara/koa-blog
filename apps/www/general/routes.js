@@ -1,9 +1,10 @@
 const generalRouter = require('koa-router')();
 const generalHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
-	multipart: true
+	multipart: true,
 });
 const passport = require('./../../../auth/auth.js');
+
 const loginUrl = '/session';
 
 // TODO: CSRF tokens, especially for this step

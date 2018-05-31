@@ -1,7 +1,7 @@
 const userRouter = require('koa-router')();
 const userHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
-	multipart: true
+	multipart: true,
 });
 
 userRouter.get('new', '/new', userHandler.newAction);

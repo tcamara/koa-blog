@@ -5,7 +5,7 @@ async function indexAction(ctx, next) {
 		title: 'Index',
 		content: 'Index content',
 	});
-};
+}
 
 async function newAction(ctx, next) {
 	await ctx.render('general/login', {
@@ -13,18 +13,16 @@ async function newAction(ctx, next) {
 		action: _getGeneralRoute('create'),
 		googleAuthLink: _getGeneralRoute('createGoogle'),
 	});
-};
+}
 
 async function createAction(ctx, next) {
-	const params = ctx.request.body;
-
 	ctx.redirect(_getGeneralRoute('index'));
-};
+}
 
 async function deleteAction(ctx, next) {
 	ctx.request.logout();
 	ctx.redirect(_getGeneralRoute('index'));
-};
+}
 
 function _getGeneralRoute(...args) {
 	if (generalRoutes === null) {

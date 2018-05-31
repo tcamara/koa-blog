@@ -1,8 +1,5 @@
 const pageRouter = require('koa-router')();
 const pageHandler = require('./handlers.js');
-const koaBody = require('koa-body')({
-	multipart: true
-});
 
 pageRouter.get('new', '/new', pageHandler.newAction);
 pageRouter.get('show', '/:pageId', pageHandler.showAction);

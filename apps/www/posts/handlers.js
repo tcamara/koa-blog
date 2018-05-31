@@ -4,19 +4,18 @@ const PostTagModel = require('./../../../models/postTag.js');
 let postRoutes = null;
 
 async function indexAction(ctx, next) {
-	const query = ctx.request.query;
 	const posts = await PostModel.getFormatted({
-		page: query.page,
-		sort: query.sort,
-		query: query.q,
-		fields: query.fields,
+		page: ctx.request.query.page,
+		sort: ctx.request.query.sort,
+		query: ctx.request.query.q,
+		fields: ctx.request.query.fields,
 	});
 
 	await ctx.render('posts/list', {
 		title: 'Posts',
 		posts,
 	});
-};
+}
 
 async function newAction(ctx, next) {
 	await ctx.render('posts/new', {
@@ -24,7 +23,7 @@ async function newAction(ctx, next) {
 		action: _getPostRoute('create'),
 		hasEditor: true,
 	});
-};
+}
 
 async function createAction(ctx, next) {
 	const params = ctx.request.body;
@@ -34,11 +33,11 @@ async function createAction(ctx, next) {
 		params.fields.title,
 		author,
 		params.fields.content,
-		params.files.image
+		params.files.image,
 	);
 
 	ctx.redirect(_getPostRoute('show', newPostId));
-};
+}
 
 async function showAction(ctx, next) {
 	const post = await PostModel.getOneFormatted(ctx.params.postId);
@@ -47,38 +46,38 @@ async function showAction(ctx, next) {
 		title: post ? post.title : 'Post Not Found',
 		post,
 	});
-};
+}
 
 async function updateAction(ctx, next) {
 	PostModel.update(
 		ctx.params.postId,
 		ctx.params.title,
 		ctx.params.author,
-		ctx.params.content
+		ctx.params.content,
 	);
 
 	ctx.redirect(_getPostRoute('show', ctx.params.postId));
-};
+}
 
 async function deleteAction(ctx, next) {
 	PostModel.remove(ctx.params.postId);
 
 	ctx.redirect(_getPostRoute('index'));
-};
+}
 
 async function addTagAction(ctx, next) {
 	PostTagModel.create(
 		ctx.params.postId,
-		ctx.params.tagId
+		ctx.params.tagId,
 	);
-};
+}
 
 async function removeTagAction(ctx, next) {
 	PostTagModel.remove(
 		ctx.params.postId,
-		ctx.params.tagId
+		ctx.params.tagId,
 	);
-};
+}
 
 function _getPostRoute(...args) {
 	if (postRoutes === null) {

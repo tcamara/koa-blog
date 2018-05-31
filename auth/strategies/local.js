@@ -1,8 +1,8 @@
-const passport = require('koa-passport')
-const localStrategy = require('passport-local').Strategy;
+const passport = require('koa-passport');
+const LocalStrategy = require('passport-local').Strategy;
 const UserModel = require('./../../models/user.js');
 
-passport.use(new localStrategy({
+passport.use(new LocalStrategy({
 	usernameField: 'email',
 }, (email, password, done) => {
 	UserModel.getByField('email', email)

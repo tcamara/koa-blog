@@ -5,32 +5,31 @@ const PostTagModel = require('./../../../models/postTag.js');
 let tagRoutes = null;
 
 async function indexAction(ctx, next) {
-	const query = ctx.request.query;
 	const tags = await TagModel.getFormatted({
-		page: query.page,
-		sort: query.sort,
-		query: query.q,
-		fields: query.fields,
+		page: ctx.request.query.page,
+		sort: ctx.request.query.sort,
+		query: ctx.request.query.q,
+		fields: ctx.request.query.fields,
 	});
 
 	await ctx.render('tags/list', {
 		title: 'Tags',
 		tags,
 	});
-};
+}
 
 async function newAction(ctx, next) {
 	await ctx.render('tags/new', {
 		title: 'New Tag',
-		action: _getTagRoute('create')
+		action: _getTagRoute('create'),
 	});
-};
+}
 
 async function createAction(ctx, next) {
 	const newTagId = await TagModel.create(ctx.request.body.name);
 
 	ctx.redirect(_getTagRoute('show', newTagId));
-};
+}
 
 async function showAction(ctx, next) {
 	const tag = await TagModel.getOneFormatted(ctx.params.tagId);
@@ -40,17 +39,16 @@ async function showAction(ctx, next) {
 		let posts = null;
 
 		if (postIds.length) {
-			const query = ctx.request.query;
 			posts = await PostModel.getFormatted({
-				page: query.page,
-				sort: query.sort,
-				customWhere: '`id` IN (' + postIds.join() + ')',
-				fields: query.fields,
+				page: ctx.request.query.page,
+				sort: ctx.request.query.sort,
+				customWhere: `\`id\` IN (${postIds.join()})`,
+				fields: ctx.request.query.fields,
 			});
 		}
 
 		await ctx.render('posts/list', {
-			title: posts ? ('Posts Tagged ' + tag.name) : 'No Posts Found',
+			title: posts ? `Posts Tagged ${tag.name}` : 'No Posts Found',
 			posts,
 		});
 	}
@@ -59,19 +57,19 @@ async function showAction(ctx, next) {
 			title: 'Tag Not Found',
 		});
 	}
-};
+}
 
 async function updateAction(ctx, next) {
 	TagModel.update(ctx.params.tagId, ctx.params.name);
 
 	ctx.redirect(_getTagRoute('show', ctx.params.tagId));
-};
+}
 
 async function deleteAction(ctx, next) {
 	TagModel.remove(ctx.params.tagId);
 
 	ctx.redirect(_getTagRoute('index'));
-};
+}
 
 function _getTagRoute(...args) {
 	if (tagRoutes === null) {

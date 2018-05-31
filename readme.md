@@ -13,6 +13,9 @@ CREATE DATABASE `blog`;
 
 CREATE USER 'blog_user'@'localhost' IDENTIFIED BY 'bad_password';
 
+(if using MySQL 8.0+, you'll need to use this line instead for now)
+CREATE USER 'blog_user'@'localhost' IDENTIFIED WITH mysql_native_password BY 'bad_password';
+
 GRANT ALL PRIVILEGES ON `blog`.* TO 'blog_user'@'localhost';
 ```
 2. Create the tables specified in createTables.sql

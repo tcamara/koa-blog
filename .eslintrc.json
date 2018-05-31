@@ -1,0 +1,10 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+    	"no-tabs": 0,
+    	"indent": ["error", "tab"],
+    	"brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
+    	"no-underscore-dangle": 0,
+    	"no-use-before-define": ["error", { "functions": false }]
+    }
+}

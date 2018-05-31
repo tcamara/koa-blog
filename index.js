@@ -2,16 +2,16 @@
 require('dotenv').config();
 
 const path = require('path');
-const koa = require('koa');
+const Koa = require('koa');
 const logger = require('koa-logger');
 const mount = require('koa-mount');
 const serve = require('koa-static');
-const mysql = require('./mysql/mysql.js');
+require('./mysql/mysql.js');
 const Setting = require('./models/setting.js');
 const passport = require('./auth/auth.js');
 const session = require('koa-session-minimal');
 
-const app = new koa();
+const app = new Koa();
 
 app.keys = [process.env.SESSION_SECRET];
 app.use(session());
@@ -28,7 +28,7 @@ app.use(async (ctx, next) => {
 	const start = new Date();
 	await next();
 	const ms = new Date() - start;
-	ctx.set('X-Response-Time', ms + 'ms');
+	ctx.set('X-Response-Time', `${ms} ms`);
 });
 
 // // Serve static assets
@@ -39,7 +39,7 @@ app.use(async (ctx, next) => {
 	const settings = await Setting.getAll();
 	global.settings = {};
 
-	for(let setting of settings) {
+	for (const setting of settings) {
 		global.settings[setting.key] = setting.value;
 	}
 
@@ -51,7 +51,7 @@ app.use(async (ctx, next) => {
 	try {
 		await next();
 	}
-	catch(err) {
+	catch (err) {
 		ctx.status = err.status || 500;
 		ctx.body = err.message;
 		ctx.app.emit('error', err, ctx);
@@ -72,4 +72,4 @@ app.use(mount('/', wwwApp));
 
 // Start up the server on the .env specified port
 app.listen(process.env.APP_PORT);
-console.log('listening on port ' + process.env.APP_PORT);
+console.log(`listening on port ${process.env.APP_PORT}`);

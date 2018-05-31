@@ -1,34 +1,34 @@
 const PostTagModel = require('./postTag.js');
 const mysql = require('./../mysql/mysql.js');
 const slugify = require('./../utils/slugify.js');
+
 let tagRoutes = null;
 
 const db = {
-	'table': 'Tag',
-	'pageSize': 5,
-	'columns': {
-		'id': { 'sortable': 1, 'filterable': 1 },
-		'name': { 'sortable': 1, 'filterable': 1 },
-		'slug': { 'sortable': 1, 'filterable': 1 },
-		'numPosts': { 'sortable': 1, 'filterable': 1 },
-	}
+	table: 'Tag',
+	pageSize: 5,
+	columns: {
+		id: { sortable: 1, filterable: 1 },
+		name: { sortable: 1, filterable: 1 },
+		slug: { sortable: 1, filterable: 1 },
+		numPosts: { sortable: 1, filterable: 1 },
+	},
 };
 
 async function getOne(tagId) {
 	const queryString = 'SELECT * FROM `Tag` WHERE `id` = ?';
 
-	return await mysql.selectOne(queryString, tagId);
+	return mysql.selectOne(queryString, tagId);
 }
 
 async function getOneFormatted(tagId) {
 	const unformattedTag = await getOne(tagId);
 
-	if(unformattedTag) {
+	if (unformattedTag) {
 		return _formatTag(unformattedTag);
 	}
-	else {
-		return null;
-	}
+
+	return null;
 }
 
 async function get(params) {
@@ -42,24 +42,23 @@ async function get(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return await mysql.selectMany(queryString);
+	return mysql.selectMany(queryString);
 }
 
 async function getFormatted(params) {
 	const unformattedTags = await get(params);
 
-	if(unformattedTags.length) {
+	if (unformattedTags.length) {
 		return _formatTags(unformattedTags);
 	}
-	else {
-		return [];
-	}
+
+	return [];
 }
 
 async function getByPosts(posts) {
 	// Grab all the unique post IDs
 	const postIds = {};
-	for(let post of posts) {
+	for (const post of posts) {
 		postIds[post.id] = [];
 	}
 
@@ -68,12 +67,12 @@ async function getByPosts(posts) {
 
 	// Grab all the tag IDs
 	const tagIds = {};
-	for(let tag of postTags) {
+	for (const tag of postTags) {
 		tagIds[tag.tagId] = 1;
 	}
 
 	// Return nothing if these posts have no tags
-	if(Object.keys(tagIds).length == 0) {
+	if (Object.keys(tagIds).length === 0) {
 		return {};
 	}
 
@@ -81,14 +80,14 @@ async function getByPosts(posts) {
 	const tagList = await _getLimitless(Object.keys(tagIds));
 
 	// Assign tag to tagId in hash
-	for(let tag of tagList) {
+	for (const tag of tagList) {
 		tag.link = _getTagRoute('show', tag.id, tag.slug);
 		tagIds[tag.id] = tag;
 	}
 
-	for(let postId in postIds) {
-		for(let postTag of postTags) {
-			if(postTag.postId == postId) {
+	for (const postId in postIds) {
+		for (const postTag of postTags) {
+			if (postTag.postId === postId) {
 				postIds[postId].push(tagIds[postTag.tagId]);
 			}
 		}
@@ -101,27 +100,27 @@ async function create(name) {
 	const slug = slugify(name);
 	const queryString = 'INSERT INTO `Tag` (`name`, `slug`) VALUES (?, ?)';
 
-	return await mysql.insert(queryString, [name, slug]);
+	return mysql.insert(queryString, [name, slug]);
 }
 
 async function update(tagId, name) {
 	const slug = slugify(name);
 	const queryString = 'UPDATE `Tag` SET `name` = ?, `slug` = ? WHERE `id` = ?';
 
-	return await mysql.update(queryString, queryString, [name, slug, tagId]);
+	return mysql.update(queryString, queryString, [name, slug, tagId]);
 }
 
 async function remove(tagId) {
 	const queryString = 'DELETE FROM `Tag` WHERE `id` = ?';
 
-	return await mysql.remove(queryString, tagId);
+	return mysql.remove(queryString, tagId);
 }
 
 // Imposes no 'pagination' limits, for internal use only
 async function _getLimitless(tagIds) {
-	const queryString = 'SELECT * FROM `Tag` WHERE `id` IN (' + tagIds.join() + ')';
+	const queryString = `SELECT * FROM \`Tag\` WHERE \`id\` IN (${tagIds.join()})`;
 
-	return await mysql.selectMany(queryString);
+	return mysql.selectMany(queryString);
 }
 
 function _formatTag(tag) {
@@ -133,7 +132,7 @@ function _formatTag(tag) {
 // Take tag objects straight from the DB and transform them into a view-ready format
 function _formatTags(tags) {
 	// Do the actual formatting
-	for(let tag of tags) {
+	for (const tag of tags) {
 		// Handle links
 		tag.href = _getTagRoute('show', tag.id, tag.slug);
 	}

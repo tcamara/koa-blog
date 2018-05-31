@@ -1,7 +1,7 @@
 const passport = require('koa-passport');
-const localStrategy = require('./strategies/local');
-const GoogleStrategy = require('./strategies/google');
 const UserModel = require('./../models/user.js');
+require('./strategies/local');
+require('./strategies/google');
 
 passport.serializeUser((user, done) => {
 	done(null, user.id);

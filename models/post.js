@@ -4,28 +4,29 @@ const TagModel = require('./tag.js');
 const UserModel = require('./user.js');
 const mysql = require('./../mysql/mysql.js');
 const slugify = require('./../utils/slugify.js');
+
 let postRoutes = null;
 
 const postImagePath = '/images/posts/';
 const fullPostImagePath = path.join(global.webRoot, postImagePath);
 const db = {
-	'table': 'Post',
-	'pageSize': 5,
-	'columns': {
-		'id': { 'sortable': 1, 'filterable': 1 },
-		'title': { 'sortable': 1, 'filterable': 1 },
-		'slug': { 'sortable': 1, 'filterable': 1 },
-		'authorId': { 'sortable': 1, 'filterable': 1 },
-		'timestamp': { 'sortable': 1, 'filterable': 1 },
-		'editTimestamp': { 'sortable': 1, 'filterable': 1 },
-		'content': { 'sortable': 0, 'filterable': 1 },
-	}
+	table: 'Post',
+	pageSize: 5,
+	columns: {
+		id: { sortable: 1, filterable: 1 },
+		title: { sortable: 1, filterable: 1 },
+		slug: { sortable: 1, filterable: 1 },
+		authorId: { sortable: 1, filterable: 1 },
+		timestamp: { sortable: 1, filterable: 1 },
+		editTimestamp: { sortable: 1, filterable: 1 },
+		content: { sortable: 0, filterable: 1 },
+	},
 };
 
 async function getOne(postId) {
 	const queryString = 'SELECT * FROM `Post` WHERE `id` = ?';
 
-	return await mysql.selectOne(queryString, postId);
+	return mysql.selectOne(queryString, postId);
 }
 
 async function get(params) {
@@ -40,40 +41,38 @@ async function get(params) {
 
 	const queryString = mysql.buildSelectQueryString(db, options);
 
-	return await mysql.selectMany(queryString);
+	return mysql.selectMany(queryString);
 }
 
 async function getOneFormatted(postId) {
 	const post = await getOne(postId);
 
-	if(post) {
-		return await _formatPost(post);
+	if (post) {
+		return _formatPost(post);
 	}
-	else {
-		return null;
-	}
+
+	return null;
 }
 
 async function getFormatted(params) {
 	const unformattedPosts = await get(params);
 
-	if(unformattedPosts.length) {
-		return await _formatPosts(unformattedPosts);
+	if (unformattedPosts.length) {
+		return _formatPosts(unformattedPosts);
 	}
-	else {
-		return [];
-	}
+
+	return [];
 }
 
 async function create(title, authorId, content, image) {
 	// Move uploaded image to correct storage location and return the permanent path
-	await moveImage(image);
+	await _moveImage(image);
 
 	const slug = slugify(title);
 	const queryString = 'INSERT INTO `Post` (`title`, `slug`, `authorId`, `timestamp`, `content`, `image`) VALUES (?, ?, ?, now(), ?, ?)';
 	const queryParams = [title, slug, authorId, content, image.name];
 
-	return await mysql.insert(queryString, queryParams);
+	return mysql.insert(queryString, queryParams);
 }
 
 async function update(postId, title, authorId, content) {
@@ -81,18 +80,18 @@ async function update(postId, title, authorId, content) {
 	const queryString = 'UPDATE `Post` SET `title` = ?, `slug` = ?, `authorId` = ?, `content` = ? WHERE `id` = ?';
 	const queryParams = [title, slug, authorId, content, postId];
 
-	return await mysql.update(queryString, queryParams);
+	return mysql.update(queryString, queryParams);
 }
 
 async function remove(postId) {
 	const queryString = 'DELETE FROM `Post` WHERE `id` = ?';
 
-	return await mysql.remove(queryString, postId);
+	return mysql.remove(queryString, postId);
 }
 
 async function _moveImage(image) {
 	// If there is no image, just return
-	if(image.size === 0) {
+	if (image.size === 0) {
 		return;
 	}
 
@@ -100,12 +99,12 @@ async function _moveImage(image) {
 	const destination = fs.createWriteStream(path.join(fullPostImagePath, image.name));
 
 	source.pipe(destination);
-	source.on('end', function() {
+	source.on('end', () => {
 		fs.unlink(image.path);
 	});
-	source.on('error', function(err) {
-		throw new Error('Error in moveImage: ' + err.message);
-	})
+	source.on('error', (err) => {
+		throw new Error(`Error in moveImage: ${err.message}`);
+	});
 }
 
 async function _formatPost(post) {
@@ -123,7 +122,7 @@ async function _formatPosts(posts) {
 	const tags = await TagModel.getByPosts(posts);
 
 	// Do the actual formatting
-	for(let post of posts) {
+	for (const post of posts) {
 		// Handle links
 		post.href = _getPostRoute('show', post.id, post.slug);
 

@@ -1,7 +1,7 @@
 const postRouter = require('koa-router')();
 const postHandler = require('./handlers.js');
 const koaBody = require('koa-body')({
-	multipart: true
+	multipart: true,
 });
 
 postRouter.get('new', '/new', postHandler.newAction);
@@ -22,4 +22,4 @@ async function requireAuthentication(ctx, next) {
 	else {
 		ctx.redirect('/session');
 	}
-};
+}
