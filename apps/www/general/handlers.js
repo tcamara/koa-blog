@@ -16,11 +16,13 @@ async function newAction(ctx, next) {
 }
 
 async function createAction(ctx, next) {
+	// TODO: currently sends you to homepage after login,
+	// should send you to the page you were attempting to access, if there is one
 	ctx.redirect(_getGeneralRoute('index'));
 }
 
 async function deleteAction(ctx, next) {
-	ctx.request.logout();
+	ctx.logout();
 	ctx.redirect(_getGeneralRoute('index'));
 }
 

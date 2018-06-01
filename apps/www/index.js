@@ -1,7 +1,7 @@
 const Koa = require('koa');
 const handlebars = require('koa-handlebars');
 
-const app = module.exports = new Koa();
+const app = new Koa();
 
 // Initialize handlebars for templating
 app.use(handlebars({
@@ -16,25 +16,25 @@ app.use(handlebars({
 		beautifyDate: (str) => {
 			const timeAgo = new Date(str);
 			if (Object.prototype.toString.call(timeAgo) === '[object Date]') {
-				if (isNaN(timeAgo.getTime())) {
+				if (Number.isNaN(timeAgo.getTime())) {
 					return 'Not Valid';
 				}
 
-				const seconds = Math.floor((new Date() - timeAgo) / 1000),
-					intervals = [
-						Math.floor(seconds / 31536000),
-						Math.floor(seconds / 2592000),
-						Math.floor(seconds / 86400),
-						Math.floor(seconds / 3600),
-						Math.floor(seconds / 60),
-					],
-					times = [
-						'year',
-						'month',
-						'day',
-						'hour',
-						'minute',
-					];
+				const seconds = Math.floor((new Date() - timeAgo) / 1000);
+				const intervals = [
+					Math.floor(seconds / 31536000),
+					Math.floor(seconds / 2592000),
+					Math.floor(seconds / 86400),
+					Math.floor(seconds / 3600),
+					Math.floor(seconds / 60),
+				];
+				const times = [
+					'year',
+					'month',
+					'day',
+					'hour',
+					'minute',
+				];
 
 				for (const key in intervals) {
 					if (intervals[key] > 1) {
@@ -55,3 +55,5 @@ app.use(handlebars({
 
 // Add in routes for this subapp
 app.use(require('./routes.js').routes());
+
+module.exports = app;
